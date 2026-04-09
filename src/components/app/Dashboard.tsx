@@ -1,8 +1,9 @@
+import Post from "./Post"
 
 const Dashboard = () => {
   return (
     <div>
-      d
+     <Post/>
     </div>
   )
 }

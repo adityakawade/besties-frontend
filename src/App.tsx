@@ -11,6 +11,7 @@ import Friend from "./components/app/Friend"
 import Video from "./components/app/Video";
 import Audio from "./components/app/Audio";
 import Chat from "./components/app/Chat";
+import NotFound from "./components/NotFound";
 
 
 const App = () => {
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="chat" element={<Chat />} />
         </Route>
 
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )

@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation } from "react-router-dom"
 import Avatar from "../shared/Avatar"
 import Card from "../shared/Card"
 import { useState } from "react"
+import Dashboard from "./Dashboard"
 
 const Layout = () => {
 
@@ -111,7 +112,9 @@ const Layout = () => {
           }
           divider
         >
-          <Outlet />
+          {
+            pathname === '/app' ? <Dashboard /> : <Outlet />
+          }
         </Card>
       </section>
 
@@ -129,7 +132,7 @@ const Layout = () => {
                     <img src="/images/avt.jpg" alt="avt" className="w-16 h-16 rounded object-cover" />
                     <div className="">
                       <h1 className="text-black font-medium">Ravi Ranjan Kumar</h1>
-                      <button className="bg-green-400 text-xs px-2 py-1 rounded text-white hover:bg-green-500 transition duration-150 mt-1">
+                      <button className="bg-green-400 font-medium text-xs px-2 py-1 rounded text-white hover:bg-green-500 transition duration-150 mt-1">
                         <i className="ri-user-add-line mr-1"></i>
                         Add Friend</button>
                     </div>
@@ -143,7 +146,7 @@ const Layout = () => {
         <Card title="Friends" divider>
 
           <div className="space-y-5">
-            {Array(20).fill(0).map((index) => (
+            {Array(20).fill(0).map((item, index) => (
 
               <div key={index} className="hover:bg-gray-100 bg-gray-50 rounded-2xl p-3 transition-all duration-300  flex justify-between ">
                 <Avatar

@@ -12,15 +12,16 @@ const ButtonModel = {
 }
 
 interface ButtonInterface {
-    children?: string
-    type?: "primary" | "secondary" | "danger" | "warning" | "dark" | "success" | "info"
-    onClick?: () => void
-    icon?: string
+    children?: string;
+    type?: "primary" | "secondary" | "danger" | "warning" | "dark" | "success" | "info";
+    onClick?: () => void;
+    icon?: string;
+    key?: string | number;
 }
 
-const Button: FC<ButtonInterface> = ({ children = "Submit", type = "primary", onClick, icon }) => {
+const Button: FC<ButtonInterface> = ({ key = 0, children = "Submit", type = "primary", onClick, icon }) => {
     return (
-        <button className={ButtonModel[type]} onClick={onClick}>
+        <button key={key} className={ButtonModel[type]} onClick={onClick}>
             {
                 icon &&
                 <i className={`ri-${icon} mr-1`}></i>

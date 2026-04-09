@@ -7,14 +7,15 @@ interface DrawerInterface {
     title?: string;
     open?: boolean;
     close?: () => void;
+    key?: string | number;
 }
 
 
-const Drawer: FC<DrawerInterface> = ({ children = "your content goes here", title = "Registartion", open = true, close }) => {
+const Drawer: FC<DrawerInterface> = ({ key = 0, children = "your content goes here", title = "Registartion", open = true, close }) => {
 
     return (
 
-        <div
+        <div key={key}
             style={{
                 right: open === true ? '0%' : '-50%',
                 transition: '0.3s'
