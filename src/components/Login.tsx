@@ -1,9 +1,37 @@
-import { Link } from "react-router-dom"
+import { data, Link } from "react-router-dom"
 import Button from "./shared/Button"
 import Card from "./shared/Card"
 import Input from "./shared/Input"
+import Form, { type FormDataType } from "./shared/Form"
+import HttpInterceptor from "../lib/HttpInterceptor"
+import { toast } from 'react-toastify'
+import axios from "axios"
+
+
 
 const Login = () => {
+
+  const handleLoginForm = async (values: FormDataType) => {
+    try {
+      const { data } = await HttpInterceptor.post('/auth/login', values);
+      console.log(data);
+
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return toast.error(error.response?.data.message);
+      }
+
+      if (error instanceof Error) {
+        return toast.error(error.message);
+      }
+
+      toast.error("Network Error");
+
+    }
+
+  }
+
+
   return (
     <div className="bg-gray-100 flex justify-center items-center h-screen">
       <div className="w-1/2 animate__animated animate__fadeIn">
@@ -19,7 +47,7 @@ const Login = () => {
                 <p className="text-gray-500">Starts your first chat now !</p>
               </div>
 
-              <form className=" space-y-6">
+              <Form className=" space-y-6" onValue={handleLoginForm}>
 
                 <Input
                   name="email"
@@ -32,7 +60,7 @@ const Login = () => {
                 />
 
                 <Button type="danger" icon="arrow-right-up-fill">Login</Button>
-              </form>
+              </Form>
 
               <div className="flex gap-2">
                 <p>Don't have an account ?</p>
