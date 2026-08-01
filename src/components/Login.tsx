@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link,  useNavigate } from "react-router-dom"
 import Button from "./shared/Button"
 import Card from "./shared/Card"
 import Input from "./shared/Input"
@@ -11,10 +11,12 @@ import { catchError } from "../lib/catchError"
 
 const Login = () => {
 
+  const navigate = useNavigate();
+
   const handleLoginForm = async (values: FormDataType) => {
     try {
-      const { data } = await HttpInterceptor.post('/auth/login', values);
-      console.log(data);
+      await HttpInterceptor.post('/auth/login', values);
+      navigate('/app');
 
     }
     catch (error: unknown) {

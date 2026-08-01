@@ -1,10 +1,14 @@
 import { Link, Outlet, useLocation } from "react-router-dom"
 import Avatar from "../shared/Avatar"
 import Card from "../shared/Card"
-import { useState } from "react"
+import { useContext, useState } from "react"
 import Dashboard from "./Dashboard"
+import Context from "../../Context"
+import HttpInterceptor from "../../lib/HttpInterceptor"
 
 const Layout = () => {
+
+  const { session } = useContext(Context);
 
 
   const { pathname } = useLocation();
@@ -39,6 +43,42 @@ const Layout = () => {
   }
 
 
+  const uploadImage = () => {
+    const input = document.createElement('input');
+    input.type = "file"
+    input.accept = "image/*"
+    input.click();
+    input.onchange = async () => {
+      if (!input.files) {
+        return
+      }
+      const file = input.files[0];
+      const payload = {
+        path: 'demo/hello.jpeg',
+        type: file.type
+      }
+      try {
+
+        const options = {
+          headers: {
+            'Content-type': file.type
+          }
+        }
+        const { data } = await HttpInterceptor.post('/storage/upload', payload)
+
+        await HttpInterceptor.put(data.url, file, options)
+        console.log("success");
+        
+
+
+      } catch (error) {
+        console.log(error);
+
+      }
+    }
+
+  }
+
 
   // 
   return (
@@ -57,14 +97,18 @@ const Layout = () => {
           {
             leftAsideSize === 350 ?
               <div className="animate__animated animate__fadeIn">
-                <Avatar
-                  size={leftAsideSize === 350 ? "lg" : "md"}
-                  title="aditya kawade"
-                  subtitle="Developer"
-                  image="/images/avt.jpg"
-                  titleColur="white"
-                  subtitleColour="#ddd"
-                />
+                {
+                  session &&
+                  <Avatar
+                    size={leftAsideSize === 350 ? "lg" : "md"}
+                    title={session.fullname}
+                    subtitle={session.email}
+                    image="/images/avt.jpg"
+                    titleColur="white"
+                    subtitleColour="#ddd"
+                    onClick={uploadImage}
+                  />
+                }
               </div>
               :
               <i title="user profile" className="ri-user-fill text-xl animate__animated animate__fadeIn"></i>
