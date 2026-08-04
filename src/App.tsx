@@ -21,7 +21,7 @@ import { useState } from "react";
 
 const App = () => {
 
-  const [session, setSession] = useState(); 
+  const [session, setSession] = useState();
   return (
     <Context.Provider value={{ session, setSession }}>
       <BrowserRouter>

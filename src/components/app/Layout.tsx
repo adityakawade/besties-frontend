@@ -5,10 +5,11 @@ import { useContext, useState } from "react"
 import Dashboard from "./Dashboard"
 import Context from "../../Context"
 import HttpInterceptor from "../../lib/HttpInterceptor"
+import { v4 as uuid } from 'uuid'
 
 const Layout = () => {
 
-  const { session } = useContext(Context);
+  const { session, setSession } = useContext(Context);
 
 
   const { pathname } = useLocation();
@@ -53,8 +54,9 @@ const Layout = () => {
         return
       }
       const file = input.files[0];
+      const path = `profile-picture/${uuid()}.png`
       const payload = {
-        path: 'demo/hello.jpeg',
+        path,
         type: file.type
       }
       try {
@@ -64,11 +66,15 @@ const Layout = () => {
             'Content-type': file.type
           }
         }
-        const { data } = await HttpInterceptor.post('/storage/upload', payload)
+        const { data } = await HttpInterceptor.post('/storage/upload', payload)  // backend api that return url
 
-        await HttpInterceptor.put(data.url, file, options)
-        console.log("success");
-        
+        await HttpInterceptor.put(data.url, file, options) // react will direct upload photo to s3
+        const { data: user } = await HttpInterceptor.put('/auth/profile-picture', { path })
+        setSession({ ...session, image: user.image })
+
+
+
+
 
 
       } catch (error) {
@@ -103,7 +109,7 @@ const Layout = () => {
                     size={leftAsideSize === 350 ? "lg" : "md"}
                     title={session.fullname}
                     subtitle={session.email}
-                    image="/images/avt.jpg"
+                    image={session.image || "/images/.jpg"}
                     titleColur="white"
                     subtitleColour="#ddd"
                     onClick={uploadImage}
