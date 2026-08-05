@@ -1,4 +1,4 @@
-import { Link,  useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Button from "./shared/Button"
 import Card from "./shared/Card"
 import Input from "./shared/Input"
@@ -46,11 +46,13 @@ const Login = () => {
                 <Input
                   name="email"
                   placeholder="Email Id"
+                  value = "adityakawade9696@gmail.com"
                 />
                 <Input
                   type="password"
                   name="password"
                   placeholder="Password"
+                  value="aditya@9696"
                 />
 
                 <Button type="danger" icon="arrow-right-up-fill">Login</Button>
