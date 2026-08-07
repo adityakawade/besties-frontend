@@ -6,17 +6,25 @@ import Dashboard from "./Dashboard"
 import Context from "../../Context"
 import HttpInterceptor from "../../lib/HttpInterceptor"
 import { v4 as uuid } from 'uuid'
+import useSWR, { mutate } from 'swr'
+import Fetcher from "../../lib/fetcher"
+const eightMinuteInMs = 8 * 60 * 1000;
 
 const Layout = () => {
 
   const { session, setSession } = useContext(Context);
 
+  const { error } = useSWR('/auth/refresh-token', Fetcher, { refreshInterval: 5000, shouldRetryOnError: false })
 
   const { pathname } = useLocation();
   const collapseSize = 140
 
   const [leftAsideSize, setLeftAsideSize] = useState(350);
   const rightAsideSize = 450;
+
+
+
+
 
   const menues = [
     {
@@ -71,6 +79,7 @@ const Layout = () => {
         await HttpInterceptor.put(data.url, file, options) // react will direct upload photo to s3
         const { data: user } = await HttpInterceptor.put('/auth/profile-picture', { path })
         setSession({ ...session, image: user.image })
+        mutate('/auth/refreh-token')
 
 
 
