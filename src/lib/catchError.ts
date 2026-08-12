@@ -1,5 +1,5 @@
 import axios from "axios";
-import { toast, type ToastPosition } from 'react-toastify'
+import { toast, type ToastPosition } from "react-hot-toast"
 
 
 

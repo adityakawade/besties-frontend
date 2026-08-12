@@ -13,7 +13,7 @@ import Video from "./components/app/Video";
 import Audio from "./components/app/Audio";
 import Chat from "./components/app/Chat";
 import NotFound from "./components/NotFound";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 import Context from "./Context";
 import { useState } from "react";
 import AuthGuard from "./guard/AuthGuard";
@@ -48,7 +48,7 @@ const App = () => {
 
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <ToastContainer />
+        <Toaster />
       </BrowserRouter>
     </Context.Provider>
   )

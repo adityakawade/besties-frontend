@@ -5,6 +5,7 @@ import Input from "./shared/Input"
 import Form, { type FormDataType } from "./shared/Form"
 import HttpInterceptor from "../lib/HttpInterceptor"
 import { catchError } from "../lib/catchError"
+import toast from "react-hot-toast"
 
 
 
@@ -16,7 +17,12 @@ const Login = () => {
   const handleLoginForm = async (values: FormDataType) => {
     try {
       await HttpInterceptor.post('/auth/login', values);
-      navigate('/app');
+      toast.success("Login success", { position: "top-right" })
+
+      setTimeout(() => {
+        navigate('/app');
+      }, 3000)
+
 
     }
     catch (error: unknown) {
@@ -46,13 +52,13 @@ const Login = () => {
                 <Input
                   name="email"
                   placeholder="Email Id"
-                  value = "adityakawade9696@gmail.com"
+
                 />
                 <Input
                   type="password"
                   name="password"
                   placeholder="Password"
-                  value="aditya@9696"
+
                 />
 
                 <Button type="danger" icon="arrow-right-up-fill">Login</Button>

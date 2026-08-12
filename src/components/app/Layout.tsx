@@ -77,7 +77,8 @@ const Layout = () => {
       const path = `profile-picture/${uuid()}.png`
       const payload = {
         path,
-        type: file.type
+        type: file.type,
+        status: "public-read"
       }
       try {
 
@@ -201,7 +202,7 @@ const Layout = () => {
       {/* right part */}
       <aside className="top-0 bg-white right-0 fixed h-full w-70 p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
 
-          <FriendSuggestion/>
+        <FriendSuggestion />
 
         <Card title="Friends" divider>
 
