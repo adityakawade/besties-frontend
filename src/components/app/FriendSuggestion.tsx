@@ -5,6 +5,8 @@ import { Skeleton } from 'antd'
 import Error from "../shared/Error"
 import Button from "../shared/Button"
 import { useState } from "react"
+import SmallButton from "../shared/SmallButton"
+import HttpInterceptor from "../../lib/HttpInterceptor"
 
 
 const FriendSuggestion = () => {
@@ -15,18 +17,22 @@ const FriendSuggestion = () => {
     })
 
     const { data, error, isLoading } = useSWR("/friend/suggestion", Fetcher)
-    console.log(data)
+    
 
 
 
-    const sendFriendRequest = (id: string, index: number) => {
+    const sendFriendRequest = async (id: string, index: number) => {
         try {
             setLoading({ state: true, index })
+
+            const { data } = await HttpInterceptor.post('/friend', { friend: id });
+            console.log(data);
+
         } catch (error) {
 
         }
         finally {
-
+            setLoading({ state: false, index:0 })
         }
     }
 
@@ -53,7 +59,7 @@ const FriendSuggestion = () => {
                                         className="w-16 h-16 rounded object-cover" />
                                     <div className="space-y-2">
                                         <h1 className="text-black font-medium capitalize`">{item.fullname}</h1>
-                                        <Button loading={loading.state && loading.index === index} onClick={() => sendFriendRequest(item._id, index)} type="success" icon="user-add-line" >Add Friend</Button>
+                                        <SmallButton loading={loading.state && loading.index === index} onClick={() => sendFriendRequest(item._id, index)} type="success" icon="user-add-line" >Add Friend</SmallButton>
                                     </div>
                                 </div>
                             ))
