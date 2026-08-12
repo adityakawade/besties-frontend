@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import Button from "./shared/Button"
 import Card from "./shared/Card"
 import Input from "./shared/Input"
@@ -6,24 +7,18 @@ import Form, { type FormDataType } from "./shared/Form"
 import HttpInterceptor from "../lib/HttpInterceptor"
 import { toast } from 'react-toastify'
 import axios from "axios"
+import { catchError } from "../lib/catchError"
 
 
 const Signup = () => {
+  const navigate = useNavigate();
   const handleSignupForm = async (values: FormDataType) => {
     try {
-      const { data } = await HttpInterceptor.post('/auth/signup', values);
-      console.log(data);
+      await HttpInterceptor.post('/auth/signup', values);
+      navigate('/login')
 
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        return toast.error(error.response?.data.message);
-      }
-
-      if (error instanceof Error) {
-        return toast.error(error.message);
-      }
-
-      toast.error("Network Error");
+    } catch (error) {
+      catchError(error)
 
     }
 

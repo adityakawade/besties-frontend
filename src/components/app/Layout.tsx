@@ -1,20 +1,32 @@
 import { Link, Outlet, useLocation } from "react-router-dom"
 import Avatar from "../shared/Avatar"
+import { useNavigate } from "react-router-dom"
 import Card from "../shared/Card"
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import Dashboard from "./Dashboard"
 import Context from "../../Context"
 import HttpInterceptor from "../../lib/HttpInterceptor"
 import { v4 as uuid } from 'uuid'
 import useSWR, { mutate } from 'swr'
 import Fetcher from "../../lib/fetcher"
+import { catchError } from "../../lib/catchError"
+import FriendSuggestion from "./FriendSuggestion"
 const eightMinuteInMs = 8 * 60 * 1000;
 
 const Layout = () => {
 
+
+
+  const navigate = useNavigate();
   const { session, setSession } = useContext(Context);
 
-  const { error } = useSWR('/auth/refresh-token', Fetcher, { refreshInterval: 5000, shouldRetryOnError: false })
+  const { error } = useSWR('/auth/refresh-token', Fetcher, { refreshInterval: eightMinuteInMs, shouldRetryOnError: true })
+
+  useEffect(() => {
+    if (error) {
+      logout()
+    }
+  }, [error])
 
   const { pathname } = useLocation();
   const collapseSize = 140
@@ -95,7 +107,15 @@ const Layout = () => {
   }
 
 
-  // 
+  const logout = async () => {
+    try {
+      const { data } = await HttpInterceptor.post('/auth/logout');
+      navigate('/login');
+    } catch (error) {
+      catchError(error)
+    }
+  }
+
   return (
     <div className="min-h-screen">
 
@@ -138,7 +158,7 @@ const Layout = () => {
               </Link>
             ))}
 
-            <button title="Logout" className="flex gap-2 items-center text-gray-300  py-3 rounded hover:text-white transition-all cursor-pointer">
+            <button onClick={logout} title="Logout" className="flex gap-2 items-center text-gray-300  py-3 rounded hover:text-white transition-all cursor-pointer">
               <i className="ri-logout-circle-r-fill text-xl"></i>
               <label className={` ${leftAsideSize === 350 ? '' : 'hidden'} cursor-pointer capitalize`}>Logout</label>
             </button>
@@ -181,26 +201,7 @@ const Layout = () => {
       {/* right part */}
       <aside className="top-0 bg-white right-0 fixed h-full w-70 p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
 
-        <div className="h-62.5  overflow-auto">
-          <Card title="Suggested" divider >
-            <div className="space-y-8">
-              {
-                Array(20).fill(0).map((item, index) => (
-                  <div key={index} className="flex gap-4 items-center">
-
-                    <img src="/images/avt.jpg" alt="avt" className="w-16 h-16 rounded object-cover" />
-                    <div className="">
-                      <h1 className="text-black font-medium">Ravi Ranjan Kumar</h1>
-                      <button className="bg-green-400 font-medium text-xs px-2 py-1 rounded text-white hover:bg-green-500 transition duration-150 mt-1">
-                        <i className="ri-user-add-line mr-1"></i>
-                        Add Friend</button>
-                    </div>
-                  </div>
-                ))
-              }
-            </div>
-          </Card>
-        </div>
+          <FriendSuggestion/>
 
         <Card title="Friends" divider>
 

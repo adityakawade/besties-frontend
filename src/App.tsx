@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
+import "font-awesome/css/font-awesome.min.css";
 import Home from "./components/Home"
 import 'remixicon/fonts/remixicon.css'
 import 'animate.css';
@@ -13,24 +14,28 @@ import Audio from "./components/app/Audio";
 import Chat from "./components/app/Chat";
 import NotFound from "./components/NotFound";
 import { ToastContainer } from "react-toastify";
-import Guard from "./Guard";
 import Context from "./Context";
 import { useState } from "react";
+import AuthGuard from "./guard/AuthGuard";
+import RedirectGuard from "./guard/RedirectGuard";
 
 
 
 const App = () => {
 
-  const [session, setSession] = useState();
+  const [session, setSession] = useState(null);
   return (
     <Context.Provider value={{ session, setSession }}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
 
-          <Route element={<Guard />}>
+          <Route element={<RedirectGuard />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+          </Route>
+
+          <Route element={<AuthGuard />}>
             <Route path="/app" element={<Layout />}>
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="my-posts" element={<Post />} />

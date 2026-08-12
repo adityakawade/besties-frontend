@@ -1,5 +1,6 @@
 import type { FC } from 'react'
 import 'remixicon/fonts/remixicon.css'
+import { Spin } from 'antd';
 
 const ButtonModel = {
     primary: "bg-blue-500 hover:bg-blue-600 rounded font-medium text-white px-6 py-2 transition duration-200 active:scale-95",
@@ -17,9 +18,19 @@ interface ButtonInterface {
     onClick?: () => void;
     icon?: string;
     key?: string | number;
+    loading?: boolean
 }
 
-const Button: FC<ButtonInterface> = ({ key = 0, children = "Submit", type = "primary", onClick, icon }) => {
+const Button: FC<ButtonInterface> = ({ key = 0, children = "Submit", type = "primary", onClick, icon, loading }) => {
+
+    if (loading) {
+        return(
+            <button disabled className='text-gray-400 '>
+                <i className='fa fa-spinner fa-spin mr-2'></i>
+                Loading...
+            </button>
+        )
+    }
     return (
         <button key={key} className={ButtonModel[type]} onClick={onClick}>
             {

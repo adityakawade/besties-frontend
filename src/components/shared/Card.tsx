@@ -3,7 +3,7 @@ import 'remixicon/fonts/remixicon.css'
 
 
 interface CardInterface {
-    children?: ReactElement;
+    children?: ReactNode;
     title?: ReactNode;
     footer?: ReactElement;
     divider?: boolean;
