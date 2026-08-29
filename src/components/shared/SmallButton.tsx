@@ -24,7 +24,7 @@ interface smallButtonInterface {
 const SmallButton: FC<smallButtonInterface> = ({ key = 0, children = "Submit", type = "primary", onClick, icon, loading }) => {
 
     if (loading) {
-        return(
+        return (
             <button disabled className='text-gray-400 '>
                 <i className='fa fa-spinner fa-spin mr-2'></i>
                 Loading...

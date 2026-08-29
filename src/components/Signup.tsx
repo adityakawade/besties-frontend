@@ -5,13 +5,13 @@ import Card from "./shared/Card"
 import Input from "./shared/Input"
 import Form, { type FormDataType } from "./shared/Form"
 import HttpInterceptor from "../lib/HttpInterceptor"
-import { toast } from 'react-toastify'
-import axios from "axios"
 import { catchError } from "../lib/catchError"
 
 
 const Signup = () => {
   const navigate = useNavigate();
+
+
   const handleSignupForm = async (values: FormDataType) => {
     try {
       await HttpInterceptor.post('/auth/signup', values);
@@ -23,6 +23,8 @@ const Signup = () => {
     }
 
   }
+
+
   return (
     <div className="bg-gray-100 flex justify-center items-center h-screen">
       <div className="w-1/2 animate__animated animate__fadeIn">

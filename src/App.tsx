@@ -28,7 +28,7 @@ const App = () => {
     <Context.Provider value={{ session, setSession }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Login />} />
 
           <Route element={<RedirectGuard />}>
             <Route path="/login" element={<Login />} />

@@ -26,11 +26,11 @@ const RedirectGuard = () => {
     }
 
     if (session === false) {
-       return <Outlet />
+        return <Outlet />
     }
 
-    return <Navigate to={'/app'}/>
-    
+    return <Navigate to={'/app'} />
+
 }
 
 

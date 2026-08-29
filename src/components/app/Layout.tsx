@@ -90,14 +90,12 @@ const Layout = () => {
         const { data } = await HttpInterceptor.post('/storage/upload', payload)  // backend api that return url
 
         await HttpInterceptor.put(data.url, file, options) // react will direct upload photo to s3
+
         const { data: user } = await HttpInterceptor.put('/auth/profile-picture', { path })
+
         setSession({ ...session, image: user.image })
+
         mutate('/auth/refreh-token')
-
-
-
-
-
 
       } catch (error) {
         console.log(error);
@@ -110,7 +108,7 @@ const Layout = () => {
 
   const logout = async () => {
     try {
-      const { data } = await HttpInterceptor.post('/auth/logout');
+      await HttpInterceptor.post('/auth/logout');
       navigate('/login');
     } catch (error) {
       catchError(error)
@@ -139,7 +137,7 @@ const Layout = () => {
                     size={leftAsideSize === 350 ? "lg" : "md"}
                     title={session.fullname}
                     subtitle={session.email}
-                    image={session.image || "/images/.jpg"}
+                    image={session.image || "/images/avt.jpg"}
                     titleColur="white"
                     subtitleColour="#ddd"
                     onClick={uploadImage}
