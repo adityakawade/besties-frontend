@@ -11,27 +11,29 @@ import { catchError } from "../../lib/catchError"
 import toast from "react-hot-toast"
 
 
-const FriendSuggestion = () => {
+const FriendRequest = () => {
 
     const [loading, setLoading] = useState({
         state: false,
         index: 0
     })
 
-    const { data, error, isLoading } = useSWR("/friend/suggestion", Fetcher)
+    const { data, error, isLoading } = useSWR("/friend/request", Fetcher)
 
 
 
 
 
 
-    const sendFriendRequest = async (id: string, index: number) => {
+
+
+    const acceptFriendRequest = async (id: string, index: number) => {
         try {
             setLoading({ state: true, index })
 
-            await HttpInterceptor.post('/friend', { friend: id });
-            toast.success("Friend request send !")
-            mutate("/friend/suggestion")
+            await HttpInterceptor.put(`/friend/${id}`, { status: "accepted" });
+            toast.success("Friend request accepted !")
+            mutate("/friend/request")
             mutate('/friend')
 
 
@@ -46,9 +48,12 @@ const FriendSuggestion = () => {
 
 
 
+
+
+
     return (
         <div className="h-62.5  overflow-auto">
-            <Card title="Add New Friends" divider >
+            <Card title="Friend's Request " divider >
 
                 {isLoading && <Skeleton active />}
 
@@ -63,22 +68,28 @@ const FriendSuggestion = () => {
                                     <div className="flex gap-4 items-center">
 
                                         <img
-                                            src={item.image || "/images/avt.jpg"}
+                                            src={item.user.image || "/images/avt.jpg"}
                                             className="w-12 h-12 rounded object-cover" />
                                         <div>
-                                            <h1 className="text-black font-medium capitalize">{item.fullname}</h1>
+                                            <h1 className="text-black font-medium capitalize">{item.user.fullname}</h1>
                                             <small className="text-gray-400">{moment(item.createdAt).format('DD MMM, YYYY')}</small>
 
                                         </div>
 
                                     </div>
 
-                                    <SmallButton loading={loading.state && loading.index === index} onClick={() => sendFriendRequest(item._id, index)} type="secondary" icon="user-add-line" >Add Friend</SmallButton>
+                                    <SmallButton
+                                        loading={loading.state && loading.index === index}
+                                        onClick={() => acceptFriendRequest(item._id, index)}
+                                        type="danger"
+                                        icon="check-double-line"
+                                    >Accept</SmallButton>
                                 </div>
                             ))
                         }
                     </div>
                 }
+
 
                 {
                     data.length === 0 &&
@@ -89,4 +100,4 @@ const FriendSuggestion = () => {
     )
 }
 
-export default FriendSuggestion
+export default FriendRequest

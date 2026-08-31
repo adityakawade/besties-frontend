@@ -11,6 +11,7 @@ import useSWR, { mutate } from 'swr'
 import Fetcher from "../../lib/fetcher"
 import { catchError } from "../../lib/catchError"
 import FriendSuggestion from "./FriendSuggestion"
+import FriendRequest from "./FriendRequest"
 const eightMinuteInMs = 8 * 60 * 1000;
 
 const Layout = () => {
@@ -201,6 +202,7 @@ const Layout = () => {
       <aside className="top-0 bg-white right-0 fixed h-full w-70 p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
 
         <FriendSuggestion />
+        <FriendRequest />
 
         <Card title="Friends" divider>
 
