@@ -81,7 +81,7 @@ const FriendSuggestion = () => {
                 }
 
                 {
-                    data.length === 0 &&
+                    data?.length === 0 &&
                     <Empty />
                 }
             </Card>

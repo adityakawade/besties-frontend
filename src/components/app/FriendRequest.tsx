@@ -81,7 +81,7 @@ const FriendRequest = () => {
                                     <SmallButton
                                         loading={loading.state && loading.index === index}
                                         onClick={() => acceptFriendRequest(item._id, index)}
-                                        type="danger"
+                                        type="success"
                                         icon="check-double-line"
                                     >Accept</SmallButton>
                                 </div>
@@ -92,7 +92,7 @@ const FriendRequest = () => {
 
 
                 {
-                    data.length === 0 &&
+                    data?.length === 0 &&
                     <Empty />
                 }
             </Card>
