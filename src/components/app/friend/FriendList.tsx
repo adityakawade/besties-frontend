@@ -11,7 +11,11 @@ interface FriendlistInterface {
 
 const FriendList: FC<FriendlistInterface> = ({ gap = 6, columns = 3 }) => {
   return (
-    <div className={`grid grid-cols-${columns} gap-${gap}`}>
+    <div className="grid"
+      style={{
+        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+        gap: `${gap * 0.25}rem`
+      }}>
       {
         Array(14).fill(0).map((item, index) => (
           <Card>

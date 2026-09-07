@@ -255,7 +255,7 @@ const Layout = () => {
         {
           (!isBlackListed) &&
           <Card title="Friends" divider>
-            <FriendList gap={6} columns={2} />
+            <FriendList gap={4} columns={2} />
           </Card>
         }
 

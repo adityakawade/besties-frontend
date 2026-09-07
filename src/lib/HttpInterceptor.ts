@@ -1,8 +1,9 @@
 import axios from "axios";
+const env = import.meta.env
 
 const HttpInterceptor = axios.create({
 
-    baseURL: 'http://localhost:8080',
+    baseURL: env.VITE_SERVER,
     withCredentials: true
 })
 
