@@ -12,5 +12,5 @@ export const catchError = (error: unknown, position: ToastPosition = 'top-right'
         return toast.error(error.message, { position: position });
     }
 
-   return toast.error("Network Error", { position: position });
+    return toast.error("Network Error", { position: position });
 }

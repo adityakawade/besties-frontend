@@ -10,29 +10,30 @@ import { v4 as uuid } from 'uuid'
 import useSWR, { mutate } from 'swr'
 import Fetcher from "../../lib/fetcher"
 import { catchError } from "../../lib/catchError"
-import FriendSuggestion from "./FriendSuggestion"
-import FriendRequest from "./FriendRequest"
+import FriendSuggestion from "./friend/FriendSuggestion"
+import FriendRequest from "./friend/FriendRequest"
+import FriendList from "./friend/FriendList"
+import { useMediaQuery } from 'react-responsive'
+import Logo from "../shared/Logo"
+import IconButton from "../shared/IconButton"
+
+
 const eightMinuteInMs = 8 * 60 * 1000;
 
 const Layout = () => {
 
 
-
+  const isMobile = useMediaQuery({ query: '(max-width: 1224px)' })
   const navigate = useNavigate();
   const { session, setSession } = useContext(Context);
 
   const { error } = useSWR('/auth/refresh-token', Fetcher, { refreshInterval: eightMinuteInMs, shouldRetryOnError: true })
 
-  useEffect(() => {
-    if (error) {
-      logout()
-    }
-  }, [error])
 
   const { pathname } = useLocation();
-  const collapseSize = 140
+  const [collapseSize, setCollapseSize] = useState(0)
 
-  const [leftAsideSize, setLeftAsideSize] = useState(350);
+  const [leftAsideSize, setLeftAsideSize] = useState(0);
   const rightAsideSize = 450;
 
 
@@ -57,6 +58,32 @@ const Layout = () => {
     },
 
   ]
+
+
+  const friendUiBlackList = [
+    "/app/friends",
+    "/app/chat",
+    "/app/video-chat",
+    "/app/audio-chat"
+  ]
+
+
+  useEffect(() => {
+    if (error) {
+      logout()
+    }
+  }, [error])
+
+
+  useEffect(() => {
+    setLeftAsideSize(isMobile ? 0 : 350);
+    setCollapseSize(isMobile ? 0 : 140)
+  }, [isMobile])
+
+  const isBlackListed = friendUiBlackList.some((path: string) => path === pathname)
+  console.log(isBlackListed);
+
+
 
   const getPathname = (pathname: string) => {
     const firstpath = pathname.split("/").pop();
@@ -118,16 +145,27 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen">
+      <nav className="flex justify-between items-center  lg:hidden bg-linear-to-br from-indigo-900 via-purple-800 to-blue-900 sticky top-0 left-0 z-20000 w-full py-4 px-6">
+        <Logo />
+        <div className="flex gap-4">
+          <IconButton onClick={logout} icon="logout-circle-line" type="success" />
+          <Link to="/app/friends">
+            <IconButton icon="chat-ai-line" type="danger" />
+          </Link>
+
+          <IconButton onClick={() => setLeftAsideSize(leftAsideSize === 350 ? collapseSize : 350)} icon="menu-3-line" type="warning" />
+        </div>
+      </nav>
 
 
       {/* left part */}
-      <aside className="bg-white top-0 left-0 fixed h-full p-8 overflow-y-auto overflow-x-hidden"
+      <aside className="bg-white top-0 left-0 fixed h-full lg:p-8 overflow-y-auto overflow-x-hidden z-20000"
         style={{
           width: leftAsideSize,
           transition: '0.2s'
         }}>
 
-        <div className="overflow-x-hidden space-y-8 bg-linear-to-br from-indigo-900 via-purple-800 to-blue-900 text-white h-full rounded-2xl p-8">
+        <div className="overflow-x-hidden space-y-8 bg-linear-to-br from-indigo-900 via-purple-800 to-blue-900 text-white h-full lg:rounded-2xl p-8">
 
           {
             leftAsideSize === 350 ?
@@ -171,19 +209,27 @@ const Layout = () => {
 
       {/* main part */}
       <section
-        className="rounded-2xl py-8 px-1"
+        className="rounded-2xl lg:py-8 lg:px-1 p-6 space-y-8"
         style={
           {
-            width: `calc(100% - ${rightAsideSize + leftAsideSize}px)`,
-            marginLeft: leftAsideSize,
-            transition: '0.2s'
+            width: isMobile
+              ? '100%'
+              : `calc(100% - ${rightAsideSize + leftAsideSize}px)`,
+            marginLeft: isMobile ? 0 : leftAsideSize,
+            transition: '0.2s',
+
           }
         }>
-        <Card
 
+        {
+          (!isBlackListed) &&
+          <FriendSuggestion />
+        }
+
+        <Card
           title={
             <div className="flex gap-4 items-center">
-              <button className="bg-gray-100 w-10 h-10 rounded-full hover:bg-slate-200" onClick={() => setLeftAsideSize(leftAsideSize === 350 ? collapseSize : 350)}>
+              <button className=" lg:block hidden bg-gray-100 w-10 h-10 rounded-full hover:bg-slate-200" onClick={() => setLeftAsideSize(leftAsideSize === 350 ? collapseSize : 350)}>
                 <i className="ri-arrow-left-line"></i>
               </button>
               <h1>{getPathname(pathname)}</h1>
@@ -195,59 +241,28 @@ const Layout = () => {
             pathname === '/app' ? <Dashboard /> : <Outlet />
           }
         </Card>
+
+        {
+          (!isBlackListed) &&
+          <FriendRequest />
+        }
       </section>
 
 
       {/* right part */}
-      <aside className="top-0 bg-white right-0 fixed h-full w-70 p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
+      <aside className=" lg:block hidden bg-white fixed  top-0 right-0  h-full  p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
 
-        <FriendSuggestion />
-        <FriendRequest />
+        {
+          (!isBlackListed) &&
+          <Card title="Friends" divider>
+            <FriendList gap={6} columns={2} />
+          </Card>
+        }
 
-        <Card title="Friends" divider>
-
-          <div className="space-y-5">
-            {Array(20).fill(0).map((item, index) => (
-
-              <div key={index} className="hover:bg-gray-100 bg-gray-50 rounded-2xl p-3 transition-all duration-300  flex justify-between ">
-                <Avatar
-
-                  size="md"
-                  image="/images/avt.jpg"
-                  title="shree kawade"
-                  subtitle={
-                    <small className={`${index % 2 === 0 ? "text-green-400" : "text-zinc-400"} capitalize font-bold`}>{index % 2 === 0 ? "Online" : "Ofline"}</small>
-                  }
-                />
-
-                <div className="space-x-3">
-
-                  <Link to="/app/chat">
-                    <button className="hover:text-blue-600 text-blue-500 transition-all" title="chat">
-                      <i className="ri-chat-ai-fill"></i>
-                    </button>
-                  </Link>
-
-                  <Link to="/app/audio-chat">
-                    <button className="hover:text-rose-600 text-rose-500 transition-all" title="call">
-                      <i className="ri-phone-fill"></i>
-                    </button>
-                  </Link>
-
-                  <Link to="/app/video-chat">
-                    <button className="hover:text-amber-600 text-amber-500 transition-all" title="video call">
-                      <i className="ri-video-on-ai-fill"></i>
-                    </button>
-                  </Link>
-                </div>
-
-              </div>
-
-
-            ))}
-          </div>
-        </Card>
+        <Card title="Recent post" />
       </aside>
+
+
     </div>
   )
 }
