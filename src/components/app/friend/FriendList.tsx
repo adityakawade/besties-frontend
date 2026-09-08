@@ -27,8 +27,6 @@ const FriendList: FC<FriendlistInterface> = ({ gap = 6, columns = 3 }) => {
                 <div className=" w-2 h-2 rounded-full bg-green-500 absolute -top-1 -right-1 animate__animated animate__pulse animate__infinite" />
               </div>
               <div className=" flex gap-3 mt-3">
-
-
                 <Link to="/app/chat">
                   <IconButton icon="chat-ai-line" type="primary"></IconButton>
                 </Link>
