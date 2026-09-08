@@ -43,7 +43,7 @@ const FriendsOnline = () => {
                                         <label className={` capitalize text-[10px] font-medium text-green-400 `}>online</label>
 
 
-                                        <Link to="/app/chat">
+                                        <Link to={`/app/chat/${item._id}`}>
                                             <i className="ri-chat-ai-line text-rose-400"></i>
                                         </Link>
 

@@ -12,7 +12,6 @@ import Fetcher from "../../lib/fetcher"
 import { catchError } from "../../lib/catchError"
 import FriendSuggestion from "./friend/FriendSuggestion"
 import FriendRequest from "./friend/FriendRequest"
-import FriendList from "./friend/FriendList"
 import { useMediaQuery } from 'react-responsive'
 import Logo from "../shared/Logo"
 import IconButton from "../shared/IconButton"
@@ -63,7 +62,7 @@ const Layout = () => {
 
   const friendUiBlackList = [
     "/app/friends",
-    "/app/chat",
+    "/app/chat/:id",
     "/app/video-chat",
     "/app/audio-chat"
   ]
@@ -82,7 +81,7 @@ const Layout = () => {
   }, [isMobile])
 
   const isBlackListed = friendUiBlackList.some((path: string) => path === pathname)
-  console.log(isBlackListed);
+
 
 
 
@@ -251,11 +250,11 @@ const Layout = () => {
 
 
       {/* right part */}
-      <aside className=" lg:block hidden bg-white fixed  top-0 right-0  h-full  p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
+      <aside className="  bg-white fixed  top-0 right-0  h-full  p-8 overflow-auto space-y-8" style={{ width: rightAsideSize, transition: '0.2s' }}>
 
-       <FriendsOnline/>
+        <FriendsOnline />
 
-        <Card title="Recent post" />
+
       </aside>
 
 
