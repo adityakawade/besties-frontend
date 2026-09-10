@@ -6,16 +6,22 @@ import Input from "./shared/Input"
 import Form, { type FormDataType } from "./shared/Form"
 import HttpInterceptor from "../lib/HttpInterceptor"
 import { catchError } from "../lib/catchError"
+import { useState } from "react"
+import toast from "react-hot-toast"
 
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [visible, setVisible] = useState(false)
 
 
   const handleSignupForm = async (values: FormDataType) => {
     try {
       await HttpInterceptor.post('/auth/signup', values);
-      navigate('/login')
+      toast.success("Account Created Successsfully Please login")
+      setTimeout(() => {
+        navigate('/login')
+      }, 2000);
 
     } catch (error) {
       catchError(error)
@@ -26,11 +32,11 @@ const Signup = () => {
 
 
   return (
-    <div className="bg-gray-100 flex justify-center items-center h-screen">
-      <div className="w-1/2 animate__animated animate__fadeIn">
+    <div className="bg-gray-100 flex justify-center items-center min-h-screen p-4">
+      <div className="lg:w-1/2 w-full animate__animated animate__fadeIn">
         <Card nopadding>
 
-          <div className="grid grid-cols-2">
+          <div className="grid lg:grid-cols-2 grid-cols-1">
 
             {/* 1st div  */}
             <div className="p-8 space-y-4">
@@ -50,9 +56,12 @@ const Signup = () => {
                   placeholder="Email Id"
                 />
                 <Input
-                  type="password"
+                  icon={<i className={` text-[17px] ${visible ? 'ri-eye-off-fill' : 'ri-eye-fill'}`}></i>}
+                  type={visible ? "text" : "password"}
                   name="password"
                   placeholder="Password"
+                  onclick={() => setVisible((prev) => !prev)}
+
                 />
                 <Input
                   name="mobile"
@@ -70,7 +79,7 @@ const Signup = () => {
 
 
             {/* 2nd div */}
-            <div className=" overflow-hidden h-125 bg-linear-to-t from-sky-500 to-indigo-500 rounded-r-xl flex justify-center items-center">
+            <div className="hidden overflow-hidden h-125 bg-linear-to-t from-sky-500 to-indigo-500 rounded-r-xl lg:flex justify-center items-center">
               <img src="/images/auth.svg" alt="auth" className="w-full animate__animated animate__slideInUp animate__faster" />
             </div>
 

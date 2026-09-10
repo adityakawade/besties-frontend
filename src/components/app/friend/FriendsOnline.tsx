@@ -12,7 +12,7 @@ const FriendsOnline = () => {
 
 
     const onlineHandler = (user: any) => {
-        console.log(user);
+    
 
         setOnlineUsers(user)
     }

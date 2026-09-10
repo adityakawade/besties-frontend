@@ -6,11 +6,14 @@ import Form, { type FormDataType } from "./shared/Form"
 import HttpInterceptor from "../lib/HttpInterceptor"
 import { catchError } from "../lib/catchError"
 import toast from "react-hot-toast"
+import { useState } from "react"
 
 
 
 
 const Login = () => {
+
+  const [visible, setVisible] = useState(false)
 
   const navigate = useNavigate();
 
@@ -33,11 +36,11 @@ const Login = () => {
 
 
   return (
-    <div className="bg-gray-100 flex justify-center items-center h-screen">
-      <div className="w-1/2 animate__animated animate__fadeIn">
+    <div className="bg-gray-100 w-full min-h-screen flex justify-center items-center p-4">
+      <div className="lg:w-1/2 w-full max-w-md lg:max-w-none animate__animated animate__fadeIn">
         <Card nopadding>
 
-          <div className="grid grid-cols-2">
+          <div className="grid lg:grid-cols-2 grid-cols-1">
 
             {/* 1st div  */}
             <div className="p-8 space-y-4">
@@ -54,12 +57,19 @@ const Login = () => {
                   placeholder="Email Id"
 
                 />
+
                 <Input
-                  type="password"
+                  icon={<i className={` text-[17px] ${visible ? 'ri-eye-off-fill' : 'ri-eye-fill'}`}></i>}
+                  type={visible ? "text" : "password"}
                   name="password"
                   placeholder="Password"
+                  onclick={() => setVisible((prev) => !prev)}
 
                 />
+
+
+
+
 
                 <Button type="danger" icon="arrow-right-up-fill">Login</Button>
               </Form>
@@ -73,7 +83,7 @@ const Login = () => {
 
 
             {/* 2nd div */}
-            <div className=" overflow-hidden h-125 bg-linear-to-t from-sky-500 to-indigo-500 rounded-r-xl flex justify-center items-center">
+            <div className="hidden overflow-hidden h-125 bg-linear-to-t from-sky-500 to-indigo-500 rounded-r-xl lg:flex justify-center items-center">
               <img src="/images/authlogin.svg" alt="auth" className="w-[90%] animate__animated animate__slideInUp animate__faster" />
             </div>
 
