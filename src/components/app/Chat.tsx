@@ -119,6 +119,7 @@ const Chat = () => {
                 return
             }
             const file = input.files[0]
+            const url = URL.createObjectURL(file)
             const ext = file.name.split('.').pop()
             const fileName = `${uuid()}.${ext}`
             const path = `chats/${fileName}`
@@ -139,16 +140,31 @@ const Chat = () => {
             const { data } = await HttpInterceptor.post('/storage/upload', payload)
             await HttpInterceptor.put(data.url, file, options)
 
+            const remoteMetaData = {
+                file: {
+                    path: path,
+                    type: file.type
+                }
+            }
 
-            socket.emit("attachment", {
+
+            const localMetaData = {
+                file: {
+                    path: url,
+                    type: file.type
+                }
+            }
+
+            const attachmentPayload = {
                 from: session,
                 to: id,
                 message: fileName,
-                file: {
-                    path,
-                    type: file.type
-                }
-            })
+            }
+
+
+            setChats((prev) => [...prev, { ...attachmentPayload, ...localMetaData }])
+
+            socket.emit("attachment", { ...attachmentPayload, ...remoteMetaData })
 
 
         } catch (error) {
@@ -157,11 +173,10 @@ const Chat = () => {
 
     }
 
-    const download = async (path: string) => {
+    const download = async (filename: string) => {
         try {
-            console.log(path);
 
-            const filename: any = path.split("/").pop()
+            const path = `chats/${filename}`
             const { data } = await HttpInterceptor.post('/storage/download', { path })
             const a = document.createElement("a");
             a.href = data.url
@@ -203,7 +218,7 @@ const Chat = () => {
                                             {
                                                 item.file &&
                                                 <div>
-                                                    <SmallButton onClick={() => download(item.file.path)} type="success" icon="download-line">Download</SmallButton>
+                                                    <SmallButton onClick={() => download(item.message)} type="success" icon="download-line">Download</SmallButton>
                                                 </div>
                                             }
                                             <div className="text-gray-500 text-right">
@@ -224,7 +239,7 @@ const Chat = () => {
                                             {
                                                 item.file &&
                                                 <div>
-                                                    <SmallButton onClick={() => download(item.file.path)} type="warning" icon="download-line">Download</SmallButton>
+                                                    <SmallButton onClick={() => download(item.message)} type="warning" icon="download-line">Download</SmallButton>
                                                 </div>
                                             }
                                             <div className="text-gray-500 text-right">

@@ -12,7 +12,7 @@ const FriendsOnline = () => {
 
 
     const onlineHandler = (user: any) => {
-    
+
 
         setOnlineUsers(user)
     }
@@ -29,6 +29,9 @@ const FriendsOnline = () => {
 
 
 
+
+
+
     return (
         <Card title="Online Friend">
             <div className="space-y-6">
@@ -36,14 +39,14 @@ const FriendsOnline = () => {
                     session && onlineUsers.filter((item: any) => item._id !== session._id).map((item: any, index) => (
                         <div key={index} className="flex">
                             <div className="flex gap-3">
-                                <img src="/images/avt.jpg" alt="" className="w-12 h-12 rounded-full object-cover" />
+                                <img src={item.image || "/images/avt.jpg"} alt="" className="w-12 h-12 rounded-full object-cover" />
                                 <div >
                                     <h1 className="font-medium capitalize">{item.fullname}</h1>
                                     <div className="flex items-center gap-4">
                                         <label className={` capitalize text-[10px] font-medium text-green-400 `}>online</label>
 
 
-                                        <Link to={`/app/chat/${item._id}`}>
+                                        <Link to={`/app/chat/${item._id}`} target="_blank">
                                             <i className="ri-chat-ai-line text-rose-400"></i>
                                         </Link>
 
