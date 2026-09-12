@@ -1,20 +1,33 @@
-import { useContext, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { catchError } from "../../lib/catchError"
 import Button from "../shared/Button"
 import Context from "../../Context"
 import toast from "react-hot-toast"
+import socket from "../../lib/socket"
+import { useParams } from "react-router-dom"
+import { notification } from "antd"
+import useNotification from "antd/es/notification/useNotification"
 
-
+const config = {
+    iceServers: [
+        {
+            urls: "stun:stun.l.google.com:19302"
+        }
+    ]
+}
 
 const Video = () => {
 
     const { session } = useContext(Context)
+    const { id } = useParams()
+    const [notify, notifyUi] = useNotification()
 
     const loacalVideoRef = useRef<HTMLVideoElement | null>(null)
     const localVideoContainerRef = useRef<HTMLDivElement | null>(null)
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null)
     const remoteVideoContainerRef = useRef<HTMLDivElement | null>(null)
     const localStreamRef = useRef<MediaStream | null>(null)
+    const rtc = useRef<RTCPeerConnection | null>(null)
 
 
     const [isVideoSharing, setIsVideoSharing] = useState(false);
@@ -149,7 +162,91 @@ const Video = () => {
     }
 
 
+    const webRtcConnection = () => {
+        rtc.current = new RTCPeerConnection(config)
 
+
+        const localStream = localStreamRef.current
+
+        if (!rtc || !localStream) {
+            return
+        }
+
+        rtc.current.onicecandidate = (e) => {
+            console.log(e.candidate);
+
+        }
+
+        rtc.current.onconnectionstatechange = (e) => {
+            console.log(rtc.current?.connectionState);
+
+        }
+
+        rtc.current.ontrack = () => {
+            console.log("someting is coming from remote user");
+
+        }
+
+        localStream.getTracks().forEach((tracks) => {
+            rtc.current?.addTrack(tracks, localStream)
+        })
+
+    }
+
+    const startCall = async () => {
+        try {
+            if (!isVideoSharing && !isScreenSharing) {
+                return toast("Start your video first", { duration: 2000 })
+            }
+
+            webRtcConnection()
+
+            if (!rtc.current) {
+                return
+            }
+
+            const offer = await rtc.current.createOffer()
+            console.log(offer);
+
+            await rtc.current.setLocalDescription(offer)
+
+            socket.emit("offer", {
+                offer,
+                to: id
+
+            })
+
+        } catch (error) {
+            catchError(error)
+        }
+    }
+
+    const endCall = () => {
+        try {
+            alert()
+        } catch (error) {
+            catchError(error)
+        }
+    }
+
+    const onOffer = (payload: any) => {
+        notification.open({
+            message: "Aditya kawade",
+            description: "Incoming Call",
+            duration: 30,
+            placement:'bottomRight'
+        })
+
+    }
+
+    useEffect(() => {
+        socket.on("offer", onOffer)
+
+
+        return () => {
+            socket.off("offer", onOffer)
+        }
+    }, [])
 
     return (
         <div className="space-y-8">
@@ -214,8 +311,12 @@ const Video = () => {
 
                 </div>
 
-                <Button type="danger" icon="close-circle-fill">End</Button>
+                <div className="space-x-4">
+                    <Button type="success" icon="phone-line" onClick={startCall}>Start</Button>
+                    <Button type="danger" icon="close-circle-fill" onClick={endCall}>End</Button>
+                </div>
             </div>
+            {notifyUi}
         </div>
     )
 }
