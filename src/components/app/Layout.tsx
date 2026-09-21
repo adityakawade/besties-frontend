@@ -184,7 +184,7 @@ const Layout = () => {
 
       {/* Main part ----------------------------------------------------------------- */}
       <section
-        className="lg:py-8 lg:px-1 flex gap-8 lg:flex-row flex-col p-6"
+        className="lg:py-8 lg:px-1 flex gap-8 lg:flex-row flex-col p-6 "
         style={{
           width: isMobile ? '100%' : `calc(100% - ${leftAsideSize}px)`,
           marginLeft: isMobile ? 0 : leftAsideSize,
@@ -196,7 +196,7 @@ const Layout = () => {
                     !isBlacklisted &&
                     <FriedsRequest />
                 } */}
-        <div className=" flex-1">
+        <div className=" flex-1  order-2 lg:order-1">
           <Card
             title={
               <div className="flex gap-4 items-center">
@@ -223,7 +223,7 @@ const Layout = () => {
 
 
         {/* right part ---------------------------------------------------- */}
-        <aside className=" bg-white lg:w-100 lg:pr-6">
+        <aside className=" bg-white lg:w-100 lg:pr-6 order-1 lg:order-2 ">
           <FriendsOnline />
         </aside>
       </section>

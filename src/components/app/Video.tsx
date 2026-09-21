@@ -5,7 +5,6 @@ import Context from "../../Context"
 import toast from "react-hot-toast"
 import socket from "../../lib/socket"
 import { useParams } from "react-router-dom"
-import { notification } from "antd"
 import useNotification from "antd/es/notification/useNotification"
 
 const config = {
@@ -14,6 +13,38 @@ const config = {
             urls: "stun:stun.l.google.com:19302"
         }
     ]
+}
+
+
+interface onOfferInterface {
+    offer: RTCSessionDescriptionInit;
+    from: string
+}
+
+interface onAnswerInterface {
+    answer: RTCSessionDescriptionInit;
+    from: string
+}
+
+
+
+interface onCandidateInterface {
+    candidate: RTCIceCandidateInit
+    from: string
+}
+
+type callType = "pending" | "incoming" | "calling" | "talking" | "end"
+
+const getCallTiming = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+    }
+
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
 }
 
 const Video = () => {
@@ -28,11 +59,16 @@ const Video = () => {
     const remoteVideoContainerRef = useRef<HTMLDivElement | null>(null)
     const localStreamRef = useRef<MediaStream | null>(null)
     const rtc = useRef<RTCPeerConnection | null>(null)
+    const audio = useRef<HTMLAudioElement | null>(null)
 
 
     const [isVideoSharing, setIsVideoSharing] = useState(false);
     const [isScreenSharing, setIsScreenSharing] = useState(false)
     const [isMic, setIsMic] = useState(false)
+    const [status, setStatus] = useState<callType>("pending")
+    const [timer, setTimer] = useState(0)
+
+
 
     const toggleScreen = async () => {
         try {
@@ -173,7 +209,10 @@ const Video = () => {
         }
 
         rtc.current.onicecandidate = (e) => {
-            console.log(e.candidate);
+
+            if (e.candidate) {
+                socket.emit("candidate", { candidate: e.candidate, to: id })
+            }
 
         }
 
@@ -182,8 +221,37 @@ const Video = () => {
 
         }
 
-        rtc.current.ontrack = () => {
-            console.log("someting is coming from remote user");
+        rtc.current.ontrack = (e) => {
+            const remoteStream = e.streams[0]
+            const remoteVideo = remoteVideoRef.current
+
+
+
+            if (!remoteStream || !remoteVideo) {
+                return
+            }
+
+            remoteVideo.srcObject = remoteStream
+
+
+            const videoTracks = remoteStream.getVideoTracks()[0]
+            if (videoTracks) {
+                videoTracks.onmute = () => {
+                    remoteVideo.style.display = "none"
+
+                }
+
+                videoTracks.onunmute = () => {
+                    remoteVideo.style.display = "block"
+
+                }
+
+
+                videoTracks.onended = () => {
+                    remoteVideo.srcObject = null
+
+                }
+            }
 
         }
 
@@ -205,11 +273,22 @@ const Video = () => {
                 return
             }
 
+
             const offer = await rtc.current.createOffer()
             console.log(offer);
 
             await rtc.current.setLocalDescription(offer)
+            setStatus("calling")
+            notify.open({
+                message: "Aditya kawade",
+                description: "Calling",
+                duration: 30,
+                placement: 'bottomRight',
+                actions: [
+                    <button key="end" className="bg-rose-300 px-3 py-1 rounded text-white hover:bg-rose-500" onClick={endCall}>End call</button>
+                ]
 
+            })
             socket.emit("offer", {
                 offer,
                 to: id
@@ -221,32 +300,156 @@ const Video = () => {
         }
     }
 
-    const endCall = () => {
+    const accept = async (payload: onOfferInterface) => {
         try {
-            alert()
+
+            webRtcConnection()
+            if (!rtc.current) {
+                return
+            }
+            const offer = new RTCSessionDescription(payload.offer)
+            await rtc.current.setRemoteDescription(offer)
+
+            const answer = await rtc.current.createAnswer()
+            await rtc.current.setLocalDescription(answer)
+
+            setStatus("talking")
+            notify.destroy()
+            socket.emit("answer", { answer, to: id })
+
         } catch (error) {
             catchError(error)
         }
     }
 
-    const onOffer = (payload: any) => {
-        notification.open({
+
+    const endCall = () => {
+        setStatus("end")
+        socket.emit("end", { to: id })
+    }
+
+    const onOffer = (payload: onOfferInterface) => {
+
+        notify.open({
             message: "Aditya kawade",
             description: "Incoming Call",
             duration: 30,
-            placement:'bottomRight'
+            placement: 'bottomRight',
+            actions: [
+                <div className="space-x-2">
+                    <button className="bg-green-400 hover:bg-green-500 px-3 py-1 rounded text-white" onClick={() => accept(payload)}>Accept</button>
+                    <button className="bg-red-400 hover:bg-red-500 px-3 py-1 rounded text-white" onClick={() => endCall()}>Reject</button>
+                </div>
+            ]
         })
 
     }
 
-    useEffect(() => {
-        socket.on("offer", onOffer)
 
+    // CONNECT BOTH USER VIA WEBRTC
+    const onConnect = async (payload: onCandidateInterface) => {
+        try {
+
+            if (!rtc.current) {
+                return
+            }
+            const candidate = new RTCIceCandidate(payload.candidate)
+            await rtc.current.addIceCandidate(candidate)
+        } catch (error) {
+            catchError(error)
+        }
+    }
+
+    const onAnswer = async (payload: onAnswerInterface) => {
+        try {
+            if (!rtc.current) {
+                return
+            }
+            const answer = new RTCSessionDescription(payload.answer)
+            await rtc.current.setRemoteDescription(answer)
+            setStatus("talking")
+            notify.destroy()
+        } catch (error) {
+            catchError(error)
+        }
+    }
+
+
+    const onEnd = () => {
+        endCall()
+
+    }
+
+
+    useEffect(() => {
+        toggleVideo()
+        socket.on("offer", onOffer)
+        socket.on("candidate", onConnect)
+        socket.on("answer", onAnswer)
+        socket.on("end", onEnd)
 
         return () => {
             socket.off("offer", onOffer)
+            socket.off("candidate", onConnect)
+            socket.off("answer", onAnswer)
+            socket.off("end", onEnd)
         }
     }, [])
+
+
+    useEffect(() => {
+
+        let interval: any
+        if (status === "pending") {
+            return
+        }
+
+
+        if (!audio.current) {
+            clearInterval(interval)
+            audio.current = new Audio()
+        }
+
+        if (status === "calling" || status === "incoming") {
+            clearInterval(interval)
+            audio.current.pause()
+            audio.current.src = "/sound/ring.mp3"
+            audio.current.currentTime = 0
+            audio.current.load()
+            audio.current.play()
+        }
+
+        if (status === "talking") {
+            clearInterval(interval)
+            audio.current.pause()
+            audio.current.currentTime = 0
+            interval = setInterval(() => {
+                setTimer((prev) => prev + 1)
+            }, 1000)
+
+        }
+
+        if (status === "end") {
+            clearInterval(interval)
+            audio.current.pause()
+            audio.current.src = "/sound/reject2.mp3"
+            audio.current.currentTime = 0
+            audio.current.load()
+            audio.current.play()
+            notify.destroy()
+        }
+
+
+        return () => {
+            if (audio.current) {
+                audio.current.pause()
+                audio.current.currentTime = 0
+                audio.current = null
+            }
+            clearInterval(interval)
+        }
+
+    }, [status])
 
     return (
         <div className="space-y-8">
@@ -312,8 +515,27 @@ const Video = () => {
                 </div>
 
                 <div className="space-x-4">
-                    <Button type="success" icon="phone-line" onClick={startCall}>Start</Button>
-                    <Button type="danger" icon="close-circle-fill" onClick={endCall}>End</Button>
+
+                    {
+                        status === "talking" &&
+                        <label>{getCallTiming(timer)}</label>
+                    }
+
+
+                    {
+                        (status === "pending" || status === "end") &&
+
+                        <Button type="success" icon="phone-line" onClick={startCall}>Start</Button>
+                    }
+
+
+
+                    {
+                        (status === "talking") &&
+
+                        <Button type="danger" icon="close-circle-line" onClick={endCall}>End</Button>
+                    }
+
                 </div>
             </div>
             {notifyUi}
