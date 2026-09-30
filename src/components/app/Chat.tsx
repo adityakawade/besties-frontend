@@ -210,9 +210,9 @@ const Chat = () => {
                                     <div className="flex gap-4 items-start">
                                         <Avatar image={session.image || "/images/avt.jpg"} size="md" />
                                         <div className="flex flex-col gap-3 relative bg-rose-50 text-pink-500 px-4 py-2 rounded-2xl flex-1 border border-rose-100">
-                                            <h1 className="font-medium text-black capitalize">you</h1>
+                                            <h1 className="font-medium text-black capitalize text-left">you</h1>
                                             {item.file && <AttachmentUi file={item.file} />}
-                                            <label>
+                                            <label className="text-left block">
                                                 {item.message}
                                             </label>
                                             {
@@ -231,9 +231,9 @@ const Chat = () => {
                                     :
                                     <div className="flex gap-4  items-start">
                                         <div className="relative bg-violet-50 text-blue-500 px-4 py-2 rounded-2xl flex-1 border border-violet-100">
-                                            <h1 className="font-medium text-black capitalize">{item.from.fullname}</h1>
+                                            <h1 className="font-medium text-black capitalize text-right">{item.from.fullname}</h1>
                                             {item.file && <AttachmentUi file={item.file} />}
-                                            <label>
+                                            <label className="text-right block">
                                                 {item.message}
                                             </label>
                                             {
@@ -242,7 +242,7 @@ const Chat = () => {
                                                     <SmallButton onClick={() => download(item.message)} type="warning" icon="download-line">Download</SmallButton>
                                                 </div>
                                             }
-                                            <div className="text-gray-500 text-right">
+                                            <div className="text-gray-500 text-left">
                                                 {moment().format('MMM DD, YYYY hh:mm:ss A')}
                                             </div>
                                             <i className=" absolute ri-arrow-right-s-fill top-0 -right-5 text-4xl text-violet-50 "></i>

@@ -4,8 +4,10 @@ import Button from "../shared/Button"
 import Context from "../../Context"
 import toast from "react-hot-toast"
 import socket from "../../lib/socket"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import useNotification from "antd/es/notification/useNotification"
+import { Modal } from "antd"
+import HttpInterceptor from "../../lib/HttpInterceptor"
 
 const config = {
     iceServers: [
@@ -16,9 +18,9 @@ const config = {
 }
 
 
-interface onOfferInterface {
+export interface onOfferInterface {
     offer: RTCSessionDescriptionInit;
-    from: string
+    from: any
 }
 
 interface onAnswerInterface {
@@ -34,6 +36,7 @@ interface onCandidateInterface {
 }
 
 type callType = "pending" | "incoming" | "calling" | "talking" | "end"
+type AudioSrcType = "/sound/ring.mp3" | "/sound/reject.mp3" | "/sound/busy.mp3 " | "/sound/reject2.mp3"
 
 const getCallTiming = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
@@ -47,9 +50,13 @@ const getCallTiming = (seconds: number): string => {
     return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
 }
 
+
+
+// //////////////////////////////////////////main video componant///////////////////////////////////////
 const Video = () => {
 
-    const { session } = useContext(Context)
+    const navigate = useNavigate()
+    const { session, liveActiveSession, sdp, setSdp } = useContext(Context)
     const { id } = useParams()
     const [notify, notifyUi] = useNotification()
 
@@ -67,8 +74,37 @@ const Video = () => {
     const [isMic, setIsMic] = useState(false)
     const [status, setStatus] = useState<callType>("pending")
     const [timer, setTimer] = useState(0)
+    const [open, setOpen] = useState(false)
 
 
+
+    const stopAudio = () => {
+
+        if (!audio.current) {
+            return
+        }
+
+        const player = audio.current;
+        player.pause();
+        player.currentTime = 0;
+
+
+    }
+
+    const playAudio = (src: AudioSrcType, loop: boolean = false) => {
+
+        stopAudio()
+        if (!audio.current) {
+            audio.current = new Audio()
+        }
+
+        const player = audio.current
+        player.src = src;
+        player.loop = loop
+        player.load()
+        player.play()
+
+    }
 
     const toggleScreen = async () => {
         try {
@@ -82,10 +118,36 @@ const Video = () => {
             if (!isScreenSharing) {
 
                 const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
+                const screenShareTrack = stream.getVideoTracks()[0]
+                const senderVideoTrack = rtc.current?.getSenders().find((sender) => sender.track?.kind === "video")
+
+                if (screenShareTrack && senderVideoTrack) {
+                    await senderVideoTrack.replaceTrack(screenShareTrack)
+                }
 
                 localVideo.srcObject = stream
                 localStreamRef.current = stream
                 setIsScreenSharing(true)
+
+
+                // detect scrren sharing off
+                screenShareTrack.onended = async () => {
+                    setIsScreenSharing(false)
+                    const videoCamStream = await navigator.mediaDevices.getUserMedia({ video: true })
+                    const videoTrack = videoCamStream.getVideoTracks()[0];
+                    const senderVideoTrack = rtc.current?.getSenders().find((sender) => sender.track?.kind === "video")
+
+                    if (videoTrack && senderVideoTrack) {
+                        await senderVideoTrack.replaceTrack(videoTrack)
+                    }
+
+                    localVideo.srcObject = videoCamStream
+                    localStreamRef.current = videoCamStream
+                    setIsVideoSharing(true)
+
+                }
+
+
             }
             else {
                 const localStream = localStreamRef.current
@@ -100,7 +162,7 @@ const Video = () => {
                 // Remove stream from video element
                 localVideo.srcObject = null
 
-                // Clear ref
+                // Clear global  ref
                 localStreamRef.current = null
 
                 setIsScreenSharing(false)
@@ -163,7 +225,7 @@ const Video = () => {
                 // Remove stream from video element
                 localVideo.srcObject = null
 
-                // Clear ref
+                // Clear  global ref
                 localStreamRef.current = null
 
                 setIsVideoSharing(false)
@@ -198,13 +260,17 @@ const Video = () => {
     }
 
 
-    const webRtcConnection = () => {
+    const webRtcConnection = async () => {
+        // const { data } = await HttpInterceptor.get("/twilio/turn-server")
+
         rtc.current = new RTCPeerConnection(config)
+
+        // rtc.current = new RTCPeerConnection({ iceServers: data })
 
 
         const localStream = localStreamRef.current
 
-        if (!rtc || !localStream) {
+        if (!rtc.current || !localStream) {
             return
         }
 
@@ -249,6 +315,8 @@ const Video = () => {
 
                 videoTracks.onended = () => {
                     remoteVideo.srcObject = null
+                    remoteVideo.style.display = "none"
+
 
                 }
             }
@@ -267,7 +335,7 @@ const Video = () => {
                 return toast("Start your video first", { duration: 2000 })
             }
 
-            webRtcConnection()
+            await webRtcConnection()
 
             if (!rtc.current) {
                 return
@@ -275,23 +343,26 @@ const Video = () => {
 
 
             const offer = await rtc.current.createOffer()
-            console.log(offer);
+
 
             await rtc.current.setLocalDescription(offer)
             setStatus("calling")
+            playAudio("/sound/ring.mp3", true)
             notify.open({
-                message: "Aditya kawade",
+                message: <h1 className="capitalize font-semibold">{liveActiveSession.fullname}</h1>,
                 description: "Calling",
                 duration: 30,
                 placement: 'bottomRight',
+                onClose: stopAudio,
                 actions: [
-                    <button key="end" className="bg-rose-300 px-3 py-1 rounded text-white hover:bg-rose-500" onClick={endCall}>End call</button>
+                    <button key="end" className="bg-rose-300 px-3 py-1 rounded text-white hover:bg-rose-500" onClick={endCallFromLocal}>End call</button>
                 ]
 
             })
             socket.emit("offer", {
                 offer,
-                to: id
+                to: id,
+                from: session
 
             })
 
@@ -302,8 +373,9 @@ const Video = () => {
 
     const accept = async (payload: onOfferInterface) => {
         try {
+            setSdp(null)
+            await webRtcConnection()
 
-            webRtcConnection()
             if (!rtc.current) {
                 return
             }
@@ -314,6 +386,7 @@ const Video = () => {
             await rtc.current.setLocalDescription(answer)
 
             setStatus("talking")
+            stopAudio()
             notify.destroy()
             socket.emit("answer", { answer, to: id })
 
@@ -323,22 +396,62 @@ const Video = () => {
     }
 
 
-    const endCall = () => {
+    const redirectOnCallEnd = () => {
+        setOpen(false)
+        navigate("/app")
+    }
+
+
+    const endStreaming = () => {
+
+        localStreamRef.current?.getTracks().forEach((track) => {
+            track.stop()
+        })
+
+        if (loacalVideoRef.current) {
+            loacalVideoRef.current.srcObject = null;
+        }
+
+        if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = null;
+        }
+    }
+
+
+
+    // localuser
+    const endCallFromLocal = () => {
         setStatus("end")
+        playAudio("/sound/reject.mp3")
+        notify.destroy()
         socket.emit("end", { to: id })
+        endStreaming()
+        setOpen(true)
+    }
+
+
+    // remote user
+    const onEndCallRemote = () => {
+        setStatus("end")
+        notify.destroy()
+        playAudio("/sound/reject.mp3")
+        endStreaming()
+        setOpen(true)
+
     }
 
     const onOffer = (payload: onOfferInterface) => {
 
+
         notify.open({
-            message: "Aditya kawade",
+            message: <h1 className="capitalize font-semibold">{payload.from.fullname}</h1>,
             description: "Incoming Call",
             duration: 30,
             placement: 'bottomRight',
             actions: [
                 <div className="space-x-2">
                     <button className="bg-green-400 hover:bg-green-500 px-3 py-1 rounded text-white" onClick={() => accept(payload)}>Accept</button>
-                    <button className="bg-red-400 hover:bg-red-500 px-3 py-1 rounded text-white" onClick={() => endCall()}>Reject</button>
+                    <button className="bg-red-400 hover:bg-red-500 px-3 py-1 rounded text-white" onClick={() => endCallFromLocal()}>Reject</button>
                 </div>
             ]
         })
@@ -368,6 +481,7 @@ const Video = () => {
             const answer = new RTCSessionDescription(payload.answer)
             await rtc.current.setRemoteDescription(answer)
             setStatus("talking")
+            stopAudio()
             notify.destroy()
         } catch (error) {
             catchError(error)
@@ -375,10 +489,7 @@ const Video = () => {
     }
 
 
-    const onEnd = () => {
-        endCall()
 
-    }
 
 
     useEffect(() => {
@@ -386,77 +497,53 @@ const Video = () => {
         socket.on("offer", onOffer)
         socket.on("candidate", onConnect)
         socket.on("answer", onAnswer)
-        socket.on("end", onEnd)
+        socket.on("end", onEndCallRemote)
 
         return () => {
             socket.off("offer", onOffer)
             socket.off("candidate", onConnect)
             socket.off("answer", onAnswer)
-            socket.off("end", onEnd)
+            socket.off("end", onEndCallRemote)
         }
     }, [])
 
 
     useEffect(() => {
-
         let interval: any
-        if (status === "pending") {
-            return
-        }
-
-
-        if (!audio.current) {
-            clearInterval(interval)
-            audio.current = new Audio()
-        }
-
-        if (status === "calling" || status === "incoming") {
-            clearInterval(interval)
-            audio.current.pause()
-            audio.current.src = "/sound/ring.mp3"
-            audio.current.currentTime = 0
-            audio.current.load()
-            audio.current.play()
-        }
 
         if (status === "talking") {
-            clearInterval(interval)
-            audio.current.pause()
-            audio.current.currentTime = 0
             interval = setInterval(() => {
                 setTimer((prev) => prev + 1)
-            }, 1000)
-
+            }, 1000);
         }
-
-        if (status === "end") {
-            clearInterval(interval)
-            audio.current.pause()
-            audio.current.src = "/sound/reject2.mp3"
-            audio.current.currentTime = 0
-            audio.current.load()
-            audio.current.play()
-            notify.destroy()
-        }
-
 
         return () => {
-            if (audio.current) {
-                audio.current.pause()
-                audio.current.currentTime = 0
-                audio.current = null
-            }
             clearInterval(interval)
         }
 
     }, [status])
 
+
+    useEffect(() => {
+        if (sdp) {
+            notify.destroy()
+            onOffer(sdp)
+        }
+    }, [sdp])
+
+
+    useEffect(() => {
+        if (!liveActiveSession) {
+            endCallFromLocal()
+        }
+    }, [liveActiveSession])
+
     return (
         <div className="space-y-8">
 
             <div ref={remoteVideoContainerRef} className="bg-black w-full h-0 relative pb-[56.25%] rounded-xl">
-                <video ref={remoteVideoRef} className=" absolute top-0 left-0 w-full h-full object-cover" autoPlay></video>
-                <button className="absolute bottom-5 left-5 text-xs text-white  bg-black/70 py-1 px-2.5 rounded-lg">Aditya kawade</button>
+                <video ref={remoteVideoRef} className=" absolute top-0 left-0 w-full h-full object-cover" autoPlay playsInline></video>
+                <button className="absolute bottom-5 left-5 text-xs text-white  bg-black/70 py-1 px-2.5 rounded-lg capitalize">{liveActiveSession.fullname}</button>
                 <button onClick={() => toggleFullScreen("remote")} className="absolute bottom-5 right-5 text-xs text-white bg-white/10 py-1 px-2.5 rounded-lg hover:scale-125 transition duration-200">
                     <i className="ri-fullscreen-line"></i>
                 </button>
@@ -467,7 +554,7 @@ const Video = () => {
 
 
                 <div ref={localVideoContainerRef} className="bg-black w-full h-0 relative pb-[56.25%] rounded-xl">
-                    <video ref={loacalVideoRef} className="object-cover absolute top-0 left-0 w-full h-full" autoPlay></video>
+                    <video ref={loacalVideoRef} className="object-cover absolute top-0 left-0 w-full h-full" autoPlay playsInline></video>
                     <button className="absolute bottom-2 left-2 text-xs text-white  bg-black/70 py-1 px-2.5 rounded-lg capitalize">{session && session.fullname}</button>
                     <button onClick={() => toggleFullScreen("local")} className="absolute bottom-2 right-2 text-xs text-white bg-white/10 py-1 px-2.5 rounded-lg hover:scale-125 transition duration-200">
                         <i className="ri-fullscreen-line"></i>
@@ -533,11 +620,20 @@ const Video = () => {
                     {
                         (status === "talking") &&
 
-                        <Button type="danger" icon="close-circle-line" onClick={endCall}>End</Button>
+                        <Button type="danger" icon="close-circle-line" onClick={endCallFromLocal}>End</Button>
                     }
 
                 </div>
             </div>
+            <Modal open={open} footer={null} centered closable onCancel={redirectOnCallEnd}>
+                <div className="text-center space-y-4">
+                    <h1 className="text-2xl font-semibold">Call Ended</h1>
+
+                    <Button icon="arrow-left-line" type="danger" onClick={redirectOnCallEnd}> Thank You</Button>
+
+
+                </div>
+            </Modal>
             {notifyUi}
         </div>
     )

@@ -23,8 +23,10 @@ import FriendList from "./components/app/friend/FriendList";
 const App = () => {
 
   const [session, setSession] = useState(null);
+  const [liveActiveSession, setLiveActiveSession] = useState(null)
+  const [sdp, setSdp] = useState(null)
   return (
-    <Context.Provider value={{ session, setSession }}>
+    <Context.Provider value={{ session, setSession, liveActiveSession, setLiveActiveSession, sdp, setSdp }}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />

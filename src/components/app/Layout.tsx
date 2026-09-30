@@ -1,4 +1,4 @@
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
+import { Link, Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import Avatar from "../shared/Avatar"
 import Card from "../shared/Card"
 import { useContext, useEffect, useState } from "react"
@@ -16,10 +16,15 @@ import { useMediaQuery } from 'react-responsive'
 import Logo from "../shared/Logo"
 import IconButton from "../shared/IconButton"
 import FriendsOnline from "./friend/FriendsOnline"
+import socket from "../../lib/socket"
+import type { onOfferInterface } from "./Video"
 
 const EightMinuteInMs = 8 * 60 * 1000
 
 const Layout = () => {
+  const params = useParams()
+  const paramsArray = Object.keys(params)
+  const { liveActiveSession, setLiveActiveSession, setSdp } = useContext(Context)
   const isMobile = useMediaQuery({ query: '(max-width: 1224px)' })
   const [leftAsideSize, setLeftAsideSize] = useState(0)
   const rightAsideSize = 450
@@ -39,6 +44,27 @@ const Layout = () => {
   ]
 
   const isBlacklisted = friendsUiBlacklist.some((path) => pathname === path)
+
+
+  const onOffer = (payload: onOfferInterface) => {
+
+    console.log(payload);
+    
+    setSdp(payload)
+    setLiveActiveSession(payload.from)
+
+    navigate(`/app/video-chat/${payload.from.socketId}`)
+
+
+  }
+
+  useEffect(() => {
+    socket.on("offer", onOffer)
+
+    return () => {
+      socket.off("offer", onOffer)
+    }
+  }, [])
 
   useEffect(() => {
     if (error) {
@@ -124,6 +150,27 @@ const Layout = () => {
     }
   }
 
+  const ActiveSessionUi = () => {
+    if (!liveActiveSession) {
+      navigate("/app")
+      return
+    }
+    return (
+      <div className="flex gap-3">
+        <img src={liveActiveSession.image || "/images/avt.jpg"} alt="" className="w-12 h-12 rounded-full object-cover" />
+
+        <div className="flex flex-col">
+          <h1 className="font-medium capitalize">{liveActiveSession.fullname}</h1>
+          <label className="text-xs text-green-400">Online</label>
+        </div>
+
+      </div>
+    )
+  }
+
+
+
+
   return (
     <div className="min-h-screen">
       <nav className="lg:hidden flex justify-between items-center bg-linear-to-br from-indigo-900 via-purple-800 to-blue-900 sticky top-0 left-0 z-20000 w-full py-4 px-6">
@@ -203,7 +250,7 @@ const Layout = () => {
                 <button className="lg:block hidden bg-gray-100 w-10 h-10 rounded-full hover:bg-slate-200" onClick={() => setLeftAsideSize(leftAsideSize === 350 ? collapseSize : 350)}>
                   <i className="ri-arrow-left-line"></i>
                 </button>
-                <h1>{getPathname(pathname)}</h1>
+                <h1>{paramsArray.length === 0 ? getPathname(pathname) : <ActiveSessionUi />}</h1>
               </div>
             }
             divider

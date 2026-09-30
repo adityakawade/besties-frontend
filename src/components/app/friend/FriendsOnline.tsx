@@ -1,14 +1,15 @@
 import Card from "../../shared/Card"
 import socket from "../../../lib/socket"
 import { useContext, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+
 import Context from "../../../Context"
+import { useNavigate } from "react-router-dom"
 
 
 const FriendsOnline = () => {
-
+    const navigate = useNavigate()
     const [onlineUsers, setOnlineUsers] = useState([])
-    const { session } = useContext(Context)
+    const { session, setLiveActiveSession } = useContext(Context)
 
 
     const onlineHandler = (user: any) => {
@@ -29,6 +30,12 @@ const FriendsOnline = () => {
 
 
 
+    const generateActiveSession = (url: string, user: any) => {
+        setLiveActiveSession(user)
+        navigate(url)
+
+    }
+
 
 
 
@@ -46,17 +53,23 @@ const FriendsOnline = () => {
                                         <label className={` capitalize text-[10px] font-medium text-green-400 `}>online</label>
 
 
-                                        <Link to={`/app/chat/${item._id}`} target="_blank">
+
+                                        <button className="hover:cursor-pointer" onClick={() => generateActiveSession(`/app/chat/${item._id}`, item)}>
                                             <i className="ri-chat-ai-line text-rose-400"></i>
-                                        </Link>
 
-                                        <Link to={`/app/audio-chat/${item._id}`}>
+                                        </button>
+
+
+                                        <button className="hover:cursor-pointer" onClick={() => generateActiveSession(`/app/audio-chat/${item._id}`, item)}>
+
                                             <i className="ri-phone-line text-amber-400"></i>
-                                        </Link>
+                                        </button>
 
-                                        <Link to={`/app/video-chat/${item._id}`}>
+                                        <button className="hover:cursor-pointer" onClick={() => generateActiveSession(`/app/video-chat/${item._id}`, item)}>
+
                                             <i className="ri-video-on-ai-line text-green-400"></i>
-                                        </Link>
+                                        </button>
+
 
 
                                     </div>
