@@ -67,6 +67,7 @@ const Video = () => {
     const localStreamRef = useRef<MediaStream | null>(null)
     const rtc = useRef<RTCPeerConnection | null>(null)
     const audio = useRef<HTMLAudioElement | null>(null)
+    const callTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 
     const [isVideoSharing, setIsVideoSharing] = useState(false);
@@ -282,7 +283,7 @@ const Video = () => {
 
         }
 
-        rtc.current.onconnectionstatechange = (e) => {
+        rtc.current.onconnectionstatechange = () => {
             console.log(rtc.current?.connectionState);
 
         }
@@ -349,7 +350,7 @@ const Video = () => {
             setStatus("calling")
             playAudio("/sound/ring.mp3", true)
             notify.open({
-                message: <h1 className="capitalize font-semibold">{liveActiveSession.fullname}</h1>,
+                title: <h1 className="capitalize font-semibold">{liveActiveSession.fullname}</h1>,
                 description: "Calling",
                 duration: 30,
                 placement: 'bottomRight',
@@ -365,6 +366,18 @@ const Video = () => {
                 from: session
 
             })
+            callTimeoutRef.current = setTimeout(() => {
+                setStatus("pending");
+
+
+
+                rtc.current?.close();
+                rtc.current = null;
+
+
+                callTimeoutRef.current = null;
+            }, 30000);
+
 
         } catch (error) {
             catchError(error)
@@ -444,12 +457,12 @@ const Video = () => {
 
 
         notify.open({
-            message: <h1 className="capitalize font-semibold">{payload.from.fullname}</h1>,
+            title: <h1 className="capitalize font-semibold">{payload.from.fullname}</h1>,
             description: "Incoming Call",
             duration: 30,
             placement: 'bottomRight',
             actions: [
-                <div className="space-x-2">
+                <div key="call-actions" className="space-x-2" >
                     <button className="bg-green-400 hover:bg-green-500 px-3 py-1 rounded text-white" onClick={() => accept(payload)}>Accept</button>
                     <button className="bg-red-400 hover:bg-red-500 px-3 py-1 rounded text-white" onClick={() => endCallFromLocal()}>Reject</button>
                 </div>
@@ -478,6 +491,13 @@ const Video = () => {
             if (!rtc.current) {
                 return
             }
+
+            // B ne call utha li → 30 sec timer cancel
+            if (callTimeoutRef.current) {
+                clearTimeout(callTimeoutRef.current)
+                callTimeoutRef.current = null
+            }
+
             const answer = new RTCSessionDescription(payload.answer)
             await rtc.current.setRemoteDescription(answer)
             setStatus("talking")

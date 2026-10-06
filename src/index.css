@@ -22,3 +22,12 @@ input:-webkit-autofill:active {
     -webkit-text-fill-color: #374151;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+
+
+.hard-reset p,
+.hard-reset h2,
+.hard-reset h3,
+.hard-reset h4 {
+    all: revert
+}
