@@ -7,14 +7,14 @@ interface CardInterface {
     title?: ReactNode;
     footer?: ReactElement;
     divider?: boolean;
-  
+
     nopadding?: boolean;
 }
 
 
-const Card: FC<CardInterface> = ({nopadding = false,  children, title, footer, divider = false }) => {
+const Card: FC<CardInterface> = ({ nopadding = false, children, title, footer, divider = false }) => {
     return (
-        <div  className={`shadow-lg ${nopadding ? '' : 'px-5 py-4'} rounded border border-gray-200 space-y-2 bg-white`}>
+        <div className={`shadow-lg ${nopadding ? '' : 'px-5 py-4'} rounded border border-gray-200 space-y-2 bg-white`}>
             {
                 title &&
                 <h1 className="font-semibold text-lg capitalize ">{title}</h1>

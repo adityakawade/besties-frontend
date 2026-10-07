@@ -3,13 +3,13 @@ import 'remixicon/fonts/remixicon.css'
 
 
 const smallButtonModel = {
-    primary: "bg-blue-500 hover:bg-blue-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
-    secondary: "bg-indigo-500 hover:bg-indigo-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
-    danger: "bg-rose-500 hover:bg-rose-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
-    warning: "bg-amber-500 hover:bg-amber-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
-    dark: "bg-zinc-500 hover:bg-zinc-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
-    success: "bg-green-400 hover:bg-green-500 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
-    info: "bg-cyan-500 hover:bg-cyan-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95"
+    primary: "w-full bg-blue-500 hover:bg-blue-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
+    secondary: "w-full bg-indigo-500 hover:bg-indigo-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
+    danger: "w-full bg-rose-500 hover:bg-rose-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
+    warning: "w-full bg-amber-500 hover:bg-amber-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
+    dark: "w-full bg-zinc-500 hover:bg-zinc-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
+    success: "w-full bg-green-400 hover:bg-green-500 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95",
+    info: "w-full bg-cyan-500 hover:bg-cyan-600 rounded font-medium text-white px-4 py-1.5 text-sm transition duration-200 active:scale-95"
 };
 
 interface smallButtonInterface {

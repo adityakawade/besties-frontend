@@ -11,7 +11,7 @@ import Fetcher from "../../lib/fetcher"
 import { catchError } from "../../lib/catchError"
 import FriedsSuggestion from "./friend/FriendSuggestion"
 import FriedsRequest from "./friend/FriendRequest"
-import FriendsList from "./friend/FriendList"
+
 import { useMediaQuery } from 'react-responsive'
 import Logo from "../shared/Logo"
 import IconButton from "../shared/IconButton"
@@ -49,7 +49,7 @@ const Layout = () => {
   const onOffer = (payload: onOfferInterface) => {
 
     console.log(payload);
-    
+
     setSdp(payload)
     setLiveActiveSession(payload.from)
 
@@ -239,10 +239,7 @@ const Layout = () => {
         }}
       >
 
-        {/* {
-                    !isBlacklisted &&
-                    <FriedsRequest />
-                } */}
+
         <div className=" flex-1  order-2 lg:order-1">
           <Card
             title={
@@ -263,15 +260,15 @@ const Layout = () => {
             }
           </Card>
         </div>
-        {/* {
-                    !isBlacklisted &&
-                    <FriedsSuggestion />
-                } */}
+
 
 
         {/* right part ---------------------------------------------------- */}
-        <aside className=" bg-white lg:w-100 lg:pr-6 order-1 lg:order-2 ">
+        <aside className=" bg-white lg:w-100 lg:pr-6 order-1 lg:order-2 flex flex-col gap-8">
+          <FriedsRequest />
+          <FriedsSuggestion />
           <FriendsOnline />
+
         </aside>
       </section>
 

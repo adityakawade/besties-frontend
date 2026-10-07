@@ -5,7 +5,7 @@ import Card from "../shared/Card"
 import { Card as AntCard, message, Skeleton } from "antd"
 import Divider from "../shared/Divider"
 import Editor from "../shared/Editor"
-import IconButton from "../shared/IconButton"
+
 import HttpInterceptor from "../../lib/HttpInterceptor"
 import { v4 as uuid } from 'uuid'
 import { catchError } from "../../lib/catchError"
@@ -22,7 +22,7 @@ interface fileDataInterface {
 const Post = () => {
 
 
-  const { data, error, isLoading } = useSWR("/post", Fetcher)
+  const { data,  isLoading } = useSWR("/post", Fetcher)
 
   const [value, setValue] = useState("")
   const [fileData, setFileData] = useState<fileDataInterface | null>(null)

@@ -7,7 +7,7 @@ import socket from "../../lib/socket"
 import { useNavigate, useParams } from "react-router-dom"
 import useNotification from "antd/es/notification/useNotification"
 import { Modal } from "antd"
-import HttpInterceptor from "../../lib/HttpInterceptor"
+
 
 const config = {
     iceServers: [
