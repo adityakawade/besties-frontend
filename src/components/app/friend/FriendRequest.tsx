@@ -24,7 +24,7 @@ const FriendRequest = () => {
 
 
 
-  console.log(data);
+  
 
   const acceptFriendRequest = async (id: string) => {
     try {

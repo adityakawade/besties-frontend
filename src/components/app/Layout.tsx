@@ -53,7 +53,19 @@ const Layout = () => {
     setSdp(payload)
     setLiveActiveSession(payload.from)
 
-    navigate(`/app/video-chat/${payload.from.socketId}`)
+
+    if (payload.type === 'video') {
+      return navigate(`/app/video-chat/${payload.from.socketId}`)
+    }
+
+    if (payload.type === 'audio') {
+      return navigate(`/app/audio-chat/${payload.from.socketId}`)
+    }
+
+    if (payload.type === 'chat') {
+      return navigate(`/app/chat/${payload.from.socketId}`)
+    }
+
 
 
   }
@@ -150,10 +162,20 @@ const Layout = () => {
     }
   }
 
+
+  useEffect(() => {
+    const isCallPage =
+      pathname.startsWith("/app/audio-chat/") ||
+      pathname.startsWith("/app/video-chat/")
+
+    if (isCallPage && !liveActiveSession) {
+      navigate("/app")
+    }
+  }, [pathname, liveActiveSession, navigate])
+
   const ActiveSessionUi = () => {
     if (!liveActiveSession) {
-      navigate("/app")
-      return
+      return null
     }
     return (
       <div className="flex gap-3">

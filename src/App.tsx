@@ -8,7 +8,6 @@ import Layout from "./components/app/Layout"
 import Dashboard from "./components/app/Dashboard"
 import Post from "./components/app/Post"
 import Video from "./components/app/Video";
-import Audio from "./components/app/Audio";
 import Chat from "./components/app/Chat";
 import NotFound from "./components/NotFound";
 import { Toaster } from "react-hot-toast";
@@ -17,6 +16,7 @@ import { useState } from "react";
 import AuthGuard from "./guard/AuthGuard";
 import RedirectGuard from "./guard/RedirectGuard";
 import FriendList from "./components/app/friend/FriendList";
+import AudioChat from "./components/app/AudioChat";
 
 
 
@@ -42,7 +42,7 @@ const App = () => {
               <Route path="my-posts" element={<Post />} />
               <Route path="friends" element={<FriendList />} />
               <Route path="video-chat/:id" element={<Video />} />
-              <Route path="audio-chat/:id" element={<Audio />} />
+              <Route path="audio-chat/:id" element={<AudioChat />} />
               <Route path="chat/:id" element={<Chat />} />
             </Route>
           </Route>

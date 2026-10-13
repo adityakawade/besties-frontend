@@ -19,24 +19,26 @@ const config = {
 
 
 export interface onOfferInterface {
-    offer: RTCSessionDescriptionInit;
+    offer: RTCSessionDescriptionInit
     from: any
+    type: 'video' | 'audio' | 'chat'
+
 }
 
-interface onAnswerInterface {
+export interface onAnswerInterface {
     answer: RTCSessionDescriptionInit;
     from: string
 }
 
 
 
-interface onCandidateInterface {
+export interface onCandidateInterface {
     candidate: RTCIceCandidateInit
     from: string
 }
 
-type callType = "pending" | "incoming" | "calling" | "talking" | "end"
-type AudioSrcType = "/sound/ring.mp3" | "/sound/reject.mp3" | "/sound/busy.mp3 " | "/sound/reject2.mp3"
+export type callType = "pending" | "incoming" | "calling" | "talking" | "end"
+export type AudioSrcType = "/sound/ring.mp3" | "/sound/reject.mp3" | "/sound/busy.mp3 " | "/sound/reject2.mp3"
 
 const getCallTiming = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
@@ -363,7 +365,8 @@ const Video = () => {
             socket.emit("offer", {
                 offer,
                 to: id,
-                from: session
+                from: session,
+                type: 'video'
 
             })
             callTimeoutRef.current = setTimeout(() => {
@@ -443,6 +446,8 @@ const Video = () => {
     }
 
 
+
+    // Event listner
     // remote user
     const onEndCallRemote = () => {
         setStatus("end")
@@ -574,7 +579,7 @@ const Video = () => {
 
 
                 <div ref={localVideoContainerRef} className="bg-black w-full h-0 relative pb-[56.25%] rounded-xl">
-                    <video ref={loacalVideoRef} className="object-cover absolute top-0 left-0 w-full h-full" autoPlay playsInline></video>
+                    <video muted ref={loacalVideoRef} className="object-cover absolute top-0 left-0 w-full h-full" autoPlay playsInline></video>
                     <button className="absolute bottom-2 left-2 text-xs text-white  bg-black/70 py-1 px-2.5 rounded-lg capitalize">{session && session.fullname}</button>
                     <button onClick={() => toggleFullScreen("local")} className="absolute bottom-2 right-2 text-xs text-white bg-white/10 py-1 px-2.5 rounded-lg hover:scale-125 transition duration-200">
                         <i className="ri-fullscreen-line"></i>
@@ -638,7 +643,7 @@ const Video = () => {
 
 
                     {
-                        (status === "talking") &&
+                        (status === "talking" || status === "calling") &&
 
                         <Button type="danger" icon="close-circle-line" onClick={endCallFromLocal}>End</Button>
                     }
