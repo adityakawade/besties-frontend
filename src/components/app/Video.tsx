@@ -7,15 +7,9 @@ import socket from "../../lib/socket"
 import { useNavigate, useParams } from "react-router-dom"
 import useNotification from "antd/es/notification/useNotification"
 import { Modal } from "antd"
+import HttpInterceptor from "../../lib/HttpInterceptor"
 
 
-const config = {
-    iceServers: [
-        {
-            urls: "stun:stun.l.google.com:19302"
-        }
-    ]
-}
 
 
 export interface onOfferInterface {
@@ -38,7 +32,7 @@ export interface onCandidateInterface {
 }
 
 export type callType = "pending" | "incoming" | "calling" | "talking" | "end"
-export type AudioSrcType = "/sound/ring.mp3" | "/sound/reject.mp3" | "/sound/busy.mp3 " | "/sound/reject2.mp3"
+export type AudioSrcType = "/sound/ring.mp3" | "/sound/reject.mp3" | "/sound/busy.mp3 " | "/sound/reject2.mp3" | "/sound/chat.mp3"
 
 const getCallTiming = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
@@ -94,7 +88,7 @@ const Video = () => {
 
     }
 
-    const playAudio = (src: AudioSrcType, loop: boolean = false) => {
+     const playAudio = (src: AudioSrcType, loop: boolean = false) => {
 
         stopAudio()
         if (!audio.current) {
@@ -264,11 +258,9 @@ const Video = () => {
 
 
     const webRtcConnection = async () => {
-        // const { data } = await HttpInterceptor.get("/twilio/turn-server")
+        const { data } = await HttpInterceptor.get("/twilio/turn-server")
 
-        rtc.current = new RTCPeerConnection(config)
-
-        // rtc.current = new RTCPeerConnection({ iceServers: data })
+        rtc.current = new RTCPeerConnection({ iceServers: data })
 
 
         const localStream = localStreamRef.current

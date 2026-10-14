@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import 'remixicon/fonts/remixicon.css'
-import { Spin } from 'antd';
+
 
 const ButtonModel = {
     primary: "bg-blue-500 hover:bg-blue-600 rounded font-medium text-white px-6 py-2 transition duration-200 active:scale-95",

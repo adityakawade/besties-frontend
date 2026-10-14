@@ -27,13 +27,7 @@ const AudioChat = () => {
     const audio = useRef<HTMLAudioElement | null>(null)
     const [status, setStatus] = useState<callType>("pending")
 
-    const config = {
-        iceServers: [
-            {
-                urls: "stun:stun.l.google.com:19302"
-            }
-        ]
-    }
+
 
     const stopAudio = () => {
 
@@ -100,9 +94,9 @@ const AudioChat = () => {
     }
     const connection = async () => {
         try {
-            // const { data } = await HttpInterceptor.get("/twilio/turn-server")
-            // rtc.current = new RTCPeerConnection({ iceServers: data })
-            rtc.current = new RTCPeerConnection(config)
+            const { data } = await HttpInterceptor.get("/twilio/turn-server")
+            rtc.current = new RTCPeerConnection({ iceServers: data })
+
             const loaclStreaming = loaclStream.current
 
             if (!loaclStreaming) {

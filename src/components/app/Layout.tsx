@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import Avatar from "../shared/Avatar"
 import Card from "../shared/Card"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import Dashboard from "./Dashboard"
 import Context from "../../Context"
 import HttpInterceptor from "../../lib/HttpInterceptor"
@@ -17,7 +17,8 @@ import Logo from "../shared/Logo"
 import IconButton from "../shared/IconButton"
 import FriendsOnline from "./friend/FriendsOnline"
 import socket from "../../lib/socket"
-import type { onOfferInterface } from "./Video"
+import type { AudioSrcType, onOfferInterface } from "./Video"
+import { notification } from "antd"
 
 const EightMinuteInMs = 8 * 60 * 1000
 
@@ -27,23 +28,57 @@ const Layout = () => {
   const { liveActiveSession, setLiveActiveSession, setSdp } = useContext(Context)
   const isMobile = useMediaQuery({ query: '(max-width: 1224px)' })
   const [leftAsideSize, setLeftAsideSize] = useState(0)
-  const rightAsideSize = 450
+  // const rightAsideSize = 450
   const [collapseSize, setCollapseSize] = useState(0)
   const { pathname } = useLocation()
   const navigate = useNavigate()
+  const audio = useRef<HTMLAudioElement | null>(null)
+  const [notify, notifyUi] = notification.useNotification()
+
+
+
+
   const { error } = useSWR('/auth/refresh-token', Fetcher, {
     refreshInterval: EightMinuteInMs,
     shouldRetryOnError: false
   })
 
-  const friendsUiBlacklist = [
-    "/app/friends",
-    "/app/chat",
-    "/app/audio-chat",
-    "/app/video-chat"
-  ]
+  // const friendsUiBlacklist = [
+  //   "/app/friends",
+  //   "/app/chat",
+  //   "/app/audio-chat",
+  //   "/app/video-chat"
+  // ]
 
-  const isBlacklisted = friendsUiBlacklist.some((path) => pathname === path)
+  // const isBlacklisted = friendsUiBlacklist.some((path) => pathname === path)
+
+  const stopAudio = () => {
+
+    if (!audio.current) {
+      return
+    }
+
+    const player = audio.current;
+    player.pause();
+    player.currentTime = 0;
+
+
+  }
+
+  const playAudio = (src: AudioSrcType, loop: boolean = false) => {
+
+    stopAudio()
+    if (!audio.current) {
+      audio.current = new Audio()
+    }
+
+    const player = audio.current
+    player.src = src;
+    player.loop = loop
+    player.load()
+    player.play()
+
+  }
 
 
   const onOffer = (payload: onOfferInterface) => {
@@ -62,19 +97,39 @@ const Layout = () => {
       return navigate(`/app/audio-chat/${payload.from.socketId}`)
     }
 
-    if (payload.type === 'chat') {
-      return navigate(`/app/chat/${payload.from.socketId}`)
+  }
+
+  const startChat = (payload: any) => {
+    notify.destroy() 
+    setLiveActiveSession(payload.from)
+    navigate(`/app/chat/${payload.from._id}`)
+  }
+
+  const onMessage = (payload: any) => {
+    if (location.href.includes("/app/chat")) {
+      return
     }
-
-
+    playAudio("/sound/chat.mp3")
+    notify.open({
+      title: <h1 className="font-medium capitalize ">{payload.from.fullname}</h1>,
+      description: payload.message,
+      placement: "bottomRight",
+      duration: 30,
+      actions: [
+        <button key="chat" onClick={() => { startChat(payload) }} className="bg-green-400 hover:bg-green-500 text-white rounded px-6 py-2">Start Chat</button>
+      ]
+    })
 
   }
 
   useEffect(() => {
     socket.on("offer", onOffer)
+    socket.on("message", onMessage)
+
 
     return () => {
       socket.off("offer", onOffer)
+      socket.off("message", onMessage)
     }
   }, [])
 
@@ -292,7 +347,9 @@ const Layout = () => {
           <FriendsOnline />
 
         </aside>
+        {notifyUi}
       </section>
+
 
     </div>
   )

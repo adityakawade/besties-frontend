@@ -17,6 +17,7 @@ import AuthGuard from "./guard/AuthGuard";
 import RedirectGuard from "./guard/RedirectGuard";
 import FriendList from "./components/app/friend/FriendList";
 import AudioChat from "./components/app/AudioChat";
+import Home from "./components/Home";
 
 
 
@@ -29,7 +30,7 @@ const App = () => {
     <Context.Provider value={{ session, setSession, liveActiveSession, setLiveActiveSession, sdp, setSdp }}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Home />} />
 
           <Route element={<RedirectGuard />}>
             <Route path="/login" element={<Login />} />
